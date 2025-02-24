@@ -70,3 +70,7 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.hover-border-resume {
+  @apply rounded-md transition-all duration-200 border-2 border-transparent hover:border-primary;
+}
