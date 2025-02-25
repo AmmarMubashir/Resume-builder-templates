@@ -1,8 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
-import { Edit2, Trash2, Plus, Check, LinkIcon, X } from "lucide-react";
+import { useState } from "react";
+import {
+  Edit2,
+  Trash2,
+  Plus,
+  Check,
+  LinkIcon,
+  X,
+  ArrowUpDown,
+} from "lucide-react";
 import type { ResumeData, Section, Link } from "../types";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 
 const initialSections: Section[] = [
   { id: "1", title: "EDUCATION", isVisible: true, type: "education" },
@@ -90,6 +116,36 @@ const initialData: ResumeData = {
   custom: [],
 };
 
+const DragHandle = ({ id }: any) => {
+  const { attributes, listeners } = useSortable({ id });
+
+  return (
+    <div
+      className="absolute left-1/2 -top-3 rounded-md transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move bg-[#E6ECF8] p-1"
+      {...attributes}
+      {...listeners}
+    >
+      <ArrowUpDown className="w-5 h-5 text-primary " />
+    </div>
+  );
+};
+
+const SortableItem = ({ id, children }: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children}
+    </div>
+  );
+};
+
 export default function EditResume() {
   const [data, setData] = useState(initialData);
   const [editingSection, setEditingSection] = useState<string | null>(null);
@@ -99,6 +155,46 @@ export default function EditResume() {
     section: string;
     id: string;
   } | null>(null);
+
+  const [activeId, setActiveId] = useState(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event: any) => {
+    const { active } = event;
+    setActiveId(active.id);
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      setData((prevData) => {
+        const oldIndex = prevData.sections.findIndex(
+          (section) => section.id === active.id
+        );
+        const newIndex = prevData.sections.findIndex(
+          (section) => section.id === over.id
+        );
+
+        return {
+          ...prevData,
+          sections: arrayMove(prevData.sections, oldIndex, newIndex),
+        };
+      });
+    }
+
+    setActiveId(null);
+  };
 
   const handleSectionVisibility = (sectionId: string) => {
     setData((prev) => ({
@@ -113,16 +209,6 @@ export default function EditResume() {
 
   const handleEditSectionTitle = (sectionId: string) => {
     setEditingTitle(sectionId);
-  };
-
-  const handleSaveSectionTitle = (sectionId: string, newTitle: string) => {
-    setData((prev) => ({
-      ...prev,
-      sections: prev.sections.map((section) =>
-        section.id === sectionId ? { ...section, title: newTitle } : section
-      ),
-    }));
-    setEditingTitle(null);
   };
 
   const handleEditLink = (section: string, id: string) => {
@@ -259,25 +345,29 @@ export default function EditResume() {
     setEditingId(newId);
   };
 
+  // Update the renderSectionTitle function
   const renderSectionTitle = (section: Section) => (
-    <div className="flex justify-between items-center mb-4 ">
+    <div className="flex justify-between items-center mb-4 group relative">
+      <DragHandle id={section.id} />
       <div className="flex-1 flex justify-center">
         {editingTitle === section.id ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full">
             <input
               type="text"
               value={section.title}
-              onChange={(e) =>
-                handleSaveSectionTitle(section.id, e.target.value)
-              }
+              onChange={(e) => {
+                const newTitle = e.target.value;
+                setData((prev) => ({
+                  ...prev,
+                  sections: prev.sections.map((s) =>
+                    s.id === section.id ? { ...s, title: newTitle } : s
+                  ),
+                }));
+              }}
+              onBlur={() => setEditingTitle(null)}
               className="w-full p-2 border rounded hover-border transition-colors duration-200 text-center font-bold text-lg"
+              autoFocus
             />
-            <button
-              onClick={() => setEditingTitle(null)}
-              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-            >
-              <Check className="w-4 h-4 text-green-600" />
-            </button>
           </div>
         ) : (
           <h2 className="text-xl font-bold text-gray-800">{section.title}</h2>
@@ -881,7 +971,6 @@ export default function EditResume() {
   };
 
   return (
-    //     WHOLE PAGE OF EDITABLE RESUME
     <div className="max-w-[850px] mx-auto p-8 bg-white mb-4 shadow-lg rounded-lg">
       <style jsx global>{`
         input:focus,
@@ -1037,33 +1126,47 @@ export default function EditResume() {
 
       <hr className="border-t border-gray-300 my-6" />
 
-      {/* Render sections based on visibility */}
-      {data.sections.map(
-        (section, index) =>
-          section.isVisible && (
-            <React.Fragment key={section.id}>
-              {" "}
-              <div
-                key={section.id}
-                className={`group relative mb-4  hover-border-resume p-2`}
-              >
-                {renderSectionTitle(section)}
-                {renderSection(section)}
-              </div>
-              {index < data.sections.length - 1 && (
-                <hr className="border-t border-gray-300 my-6" />
-              )}
-            </React.Fragment>
-          )
-      )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={data.sections.map((section) => section.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {data.sections.map(
+            (section, index) =>
+              section.isVisible && (
+                <SortableItem key={section.id} id={section.id}>
+                  <div className="group relative mb-4 hover-border-resume p-2">
+                    {renderSectionTitle(section)}
+                    {renderSection(section)}
+                  </div>
+                  {index < data.sections.length - 1 && (
+                    <hr className="border-t border-gray-300 my-6" />
+                  )}
+                </SortableItem>
+              )
+          )}
+        </SortableContext>
+        <DragOverlay>
+          {activeId ? (
+            <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-blue-500">
+              {data.sections.find((section) => section.id === activeId)?.title}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Add New Section button */}
       <div className="relative mt-8 pt-6 border-t border-gray-300">
         <button
           onClick={handleAddSection}
-          className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-2 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
+          className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6ECF8] px-4 py-2 flex items-center gap-2 text-sm  hover:text-primary/90 border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5 text-primary" />
           Add New Section
         </button>
       </div>
