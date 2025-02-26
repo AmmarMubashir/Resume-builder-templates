@@ -1,6 +1,7 @@
 export interface Link {
   text: string;
   url: string;
+  icon?: any;
 }
 
 export interface Section {
@@ -13,6 +14,7 @@ export interface Section {
 export interface ResumeData {
   personalInfo: {
     name: string;
+    title?: string;
     links: {
       [key: string]: Link;
     };
@@ -23,6 +25,7 @@ export interface ResumeData {
     [key: string]: string[];
   };
   experience: any[];
+  achievements?: any[];
   projects: any[];
   certificates: any[];
   custom: any[];
