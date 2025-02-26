@@ -9,6 +9,10 @@ import {
   LinkIcon,
   X,
   ArrowUpDown,
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
 } from "lucide-react";
 import type { ResumeData, Section, Link } from "../types";
 import {
@@ -30,86 +34,100 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 const initialSections: Section[] = [
-  { id: "1", title: "EDUCATION", isVisible: true, type: "education" },
-  { id: "2", title: "SKILLS SUMMARY", isVisible: true, type: "skills" },
-  { id: "3", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
-  { id: "4", title: "PROJECTS", isVisible: true, type: "projects" },
-  { id: "5", title: "CERTIFICATES", isVisible: true, type: "certificates" },
+  { id: "1", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
+  { id: "2", title: "EDUCATION", isVisible: true, type: "education" },
+  { id: "3", title: "PROJECT", isVisible: true, type: "projects" },
+  { id: "4", title: "SKILLS", isVisible: true, type: "skills" },
+  { id: "5", title: "Achievement", isVisible: true, type: "certificates" },
 ];
 
 const initialData: ResumeData = {
   personalInfo: {
-    name: "Syed Moazam Ali",
+    name: "Rahul Kumar",
+    title:
+      "Full Stack Developer | Integrated Dual Degree (BTech+MTech) | CSE IIT Kharagpur",
     links: {
-      linkedin: { text: "LinkedIn", url: "linkedin" },
-      github: { text: "Github/ Behance", url: "github" },
-      email: { text: "Email", url: "abc123@gmail.com" },
-      phone: { text: "Phone", url: "+92345-9087654" },
+      email: {
+        text: "rahulkumar2007@gmail.com",
+        url: "rahulkumar2007@gmail.com",
+      },
+      phone: { text: "+918117244114", url: "+918117244114" },
+      location: { text: "India", url: "India" },
+      linkedin: { text: "rahul.kumar", url: "rahul.kumar" },
     },
   },
   sections: initialSections,
   education: [
     {
       id: "1",
-      institution: "Vellore Institute of Technology",
-      location: "Chennai, India",
-      degree: "Master of Computer Application",
-      gpa: "8.06",
-      startDate: "June 2022",
-      endDate: "August 2024",
+      institution: "IIT Kharagpur",
+      location: "",
+      degree: "Integrated Dual Degree (BTech+Mtech) - 9.2/10",
+      gpa: "",
+      startDate: "2019",
+      endDate: "2024",
     },
   ],
   skills: {
-    languages: ["Python", "SQL", "JAVA"],
-    frameworks: ["Pandas", "Numpy", "Scikit-Learn", "Matplotlib"],
-    tools: ["Power BI", "Excel", "PowerPoint", "Tableau", "MySQL", "SQLite"],
-    platforms: [
-      "PyCharm",
-      "Jupyter Notebook",
-      "Visual Studio Code",
-      "IntelliJ IDEA",
+    languages: ["Languages: C/C++, Python, Javascript, Java, Scala"],
+    frameworks: [
+      "Frameworks: React.Js, Django, Vue.Js, Springboot, Flink, Spark",
     ],
-    softSkills: [
-      "Rapport Building",
-      "Strong Stakeholder management",
-      "People Management",
-      "Excellent communication",
+    cloud: [
+      "Cloud/Databases/Tech-Stack: Postgres, MS-SQL, Mysql, AWS Services, Azure Services, ELK Stack, Prometheus, Kubernetes, Docker, Aerospike, Airflow, Helm",
     ],
   },
   experience: [
     {
       id: "1",
-      title: "BUSINESS ANALYST INTERN",
-      company: "WS",
-      link: { text: "LINK", url: "#" },
-      duration: "January 24- March 24",
+      title: "Software Development Intern",
+      company: "TechSolve Solutions",
+      link: { text: "", url: "" },
+      duration: "July 2024 - Dec 2024",
       points: [
-        "Streamlined data collection and reporting procedures, reducing processing time by 20% enhancing efficiency.",
-        "Implemented process improvements and automation solutions, resulting in 15% increase in productivity.",
-        "Collaborated with 3+ cross-functional teams to gather requirements, define project scopes, and ensure alignment with business objectives.",
+        "Developed a responsive web application using React.js and TailwindCSS, improving user engagement by 15%.",
+        "Collaborated with a team of 4 to implement a RESTful API using Node.js and Express, ensuring seamless data flow between the frontend and backend.",
+        "Optimized database queries in MongoDB, reducing query response time by 20%.",
+        "Implemented JWT-based authentication, securing user access for 500+ accounts.",
+        "Participated in code reviews and followed Agile methodologies, improving code quality and development efficiency.",
+        "Deployed the application on AWS S3 and EC2, ensuring scalability and 99.9% uptime.",
       ],
     },
   ],
   projects: [
     {
       id: "1",
-      title: "Student Performance Prediction",
-      link: { text: "LINK", url: "#" },
-      duration: "December 23- February 2024",
+      title: "TaskManager Pro",
+      link: { text: "", url: "" },
+      duration: "2019 - 2020",
       points: [
-        "Achieved a 96% accuracy in predicting student performance using machine learning.",
-        "Managed data integration from multiple sources, improving data quality by 30%.",
+        "Developed TaskManager Pro, a task management web application to streamline daily task organization and communication.",
+        "Implemented user authentication (signup, login, and password recovery) with secure JWT-based access, ensuring data protection for 1,000+ users.",
+        "Designed an intuitive task management system with CRUD operations, improving task completion efficiency by 25%.",
+        "Enabled team collaboration by allowing task sharing and assignments, boosting team productivity by 30%.",
+        "Integrated email notifications for task updates and deadlines, reducing missed deadlines by 20%.",
+        "Built using React.js, Node.js (Express), MongoDB, AWS S3/EC2, and JWT authentication, ensuring scalability and performance.",
+      ],
+    },
+    {
+      id: "2",
+      title: "Portfolio Builder",
+      link: { text: "", url: "" },
+      duration: "2020 - 2021",
+      points: [
+        "Developed a dynamic web application enabling users to create and customize professional portfolios with real-time previews.",
+        "Integrated drag-and-drop features using React.js, enhancing user experience and reducing portfolio creation time by 40%.",
+        "Built with React.js, Node.js, and MongoDB, and deployed on AWS S3/EC2, ensuring fast load times and scalability.",
       ],
     },
   ],
   certificates: [
     {
       id: "1",
-      name: "Programming in Python (Meta)",
-      link: { text: "CERTIFICATE", url: "#" },
-      date: "March 2023",
-      description:
-        "Mastered fundamental Python syntax, proficiently utilizing control flow, loops, functions, and data structures.",
+      name: "AIR 756 in JEE Advance 2019",
+      link: { text: "", url: "" },
+      date: "",
+      description: "",
     },
   ],
   custom: [],
@@ -120,11 +138,11 @@ const DragHandle = ({ id }: any) => {
 
   return (
     <div
-      className="absolute left-1/2 -top-3 rounded-md transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move bg-[#E6ECF8] p-1"
+      className="absolute left-1/2 -top-3 rounded-md transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move bg-[#E6F7F5] p-1"
       {...attributes}
       {...listeners}
     >
-      <ArrowUpDown className="w-5 h-5 text-primary " />
+      <ArrowUpDown className="w-5 h-5 text-[#26B6A5]" />
     </div>
   );
 };
@@ -348,7 +366,7 @@ export default function EditResume() {
   const renderSectionTitle = (section: Section) => (
     <div className="flex justify-between items-center mb-4 group relative">
       <DragHandle id={section.id} />
-      <div className="flex-1 flex justify-center">
+      <div className="flex-1">
         {editingTitle === section.id ? (
           <div className="flex items-center gap-2 w-full">
             <input
@@ -369,7 +387,9 @@ export default function EditResume() {
             />
           </div>
         ) : (
-          <h2 className="text-xl font-bold text-gray-800">{section.title}</h2>
+          <h2 className="text-lg font-bold text-[#26B6A5] uppercase border-b-2 border-[#26B6A5] pb-1 inline-block">
+            {section.title}
+          </h2>
         )}
       </div>
       <div className="hidden group-hover:flex gap-2">
@@ -378,14 +398,14 @@ export default function EditResume() {
             onClick={() => handleAdd(section.type)}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
-            <Plus className="w-4 h-4 text-gray-600" />
+            <Plus className="w-4 h-4 text-[#26B6A5]" />
           </button>
         )}
         <button
           onClick={() => handleEditSectionTitle(section.id)}
           className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
         >
-          <Edit2 className="w-4 h-4 text-gray-600" />
+          <Edit2 className="w-4 h-4 text-[#26B6A5]" />
         </button>
         <button
           onClick={() => handleSectionVisibility(section.id)}
@@ -408,7 +428,7 @@ export default function EditResume() {
               const newLink = { ...link, text: e.target.value };
               handleSaveLink(section, id, newLink);
             }}
-            className="w-20 p-2 border rounded hover-border transition-colors duration-200 text-blue-600"
+            className="w-20 p-2 border rounded hover-border transition-colors duration-200 text-[#26B6A5]"
           />
           <input
             type="text"
@@ -443,20 +463,20 @@ export default function EditResume() {
       <span className="inline-flex items-center gap-1">
         {link.text && link.url ? (
           <>
-            <a href={link.url} className="text-blue-600 hover:underline">
+            <a href={link.url} className="text-[#26B6A5] hover:underline">
               {link.text}
             </a>
             <button
               onClick={() => handleEditLink(section, id)}
               className="ml-2 p-2 hover:bg-gray-100 rounded opacity-0 group-hover/item:opacity-100"
             >
-              <LinkIcon className="w-3 h-3 text-gray-600" />
+              <LinkIcon className="w-3 h-3 text-[#26B6A5]" />
             </button>
           </>
         ) : (
           <button
             onClick={() => handleEditLink(section, id)}
-            className="text-blue-600 hover:underline opacity-0 group-hover/item:opacity-100"
+            className="text-[#26B6A5] hover:underline opacity-0 group-hover/item:opacity-100"
           >
             Add link
           </button>
@@ -478,14 +498,14 @@ export default function EditResume() {
             {data.education.map((edu) => (
               <div
                 key={edu.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#356CB5]"
+                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#26B6A5]"
               >
                 <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
                   <button
                     onClick={() => handleEdit("education", edu.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-gray-600" />
+                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
                   </button>
                   <button
                     onClick={() => handleDelete("education", edu.id)}
@@ -589,16 +609,11 @@ export default function EditResume() {
                   <>
                     <div className="flex justify-between">
                       <div className="font-bold">{edu.institution}</div>
-                      <div>{edu.location}</div>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <div>
-                        {edu.degree}: GPA: {edu.gpa}
-                      </div>
-                      <div className="font-bold">
+                      <div className="text-right">
                         {edu.startDate} - {edu.endDate}
                       </div>
                     </div>
+                    <div className="text-sm">{edu.degree}</div>
                   </>
                 )}
               </div>
@@ -630,7 +645,7 @@ export default function EditResume() {
                       </div>
                     </div>
                     <textarea
-                      value={skills.join(", ")}
+                      value={Array.isArray(skills) ? skills.join(", ") : skills}
                       onChange={(e) => {
                         const newSkills = {
                           ...data.skills,
@@ -649,7 +664,7 @@ export default function EditResume() {
                 ))}
                 <button
                   onClick={() => handleAdd("skills")}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                  className="flex items-center gap-2 text-[#26B6A5] hover:text-[#1a8a7c]"
                 >
                   <Plus className="w-4 h-4" /> Add new skill category
                 </button>
@@ -669,19 +684,18 @@ export default function EditResume() {
                 </div>
               </div>
             ) : (
-              <ul className="list-disc ml-5 space-y-1">
+              <ul className="list-none space-y-1">
                 {Object.entries(data.skills).map(([category, skills]) => (
                   <li
                     key={category}
                     className="group/item relative hover-border-resume"
                   >
-                    <span className="font-bold capitalize">{category}:</span>{" "}
-                    {skills.join(", ")}
+                    {Array.isArray(skills) ? skills.join(", ") : skills}
                     <button
                       onClick={() => handleEdit("skills")}
                       className="ml-2 p-2 hover:bg-gray-100 rounded opacity-0 group-hover/item:opacity-100"
                     >
-                      <Edit2 className="w-4 h-4 text-gray-600" />
+                      <Edit2 className="w-4 h-4 text-[#26B6A5]" />
                     </button>
                   </li>
                 ))}
@@ -691,20 +705,19 @@ export default function EditResume() {
         );
       case "experience":
       case "projects":
-      case "certificates":
         return (
           <div className="group relative mb-6">
             {data[section.type].map((item: any) => (
               <div
                 key={item.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#356CB5]"
+                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#26B6A5] mb-4"
               >
                 <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
                   <button
                     onClick={() => handleEdit(section.type, item.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-gray-600" />
+                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
                   </button>
                   <button
                     onClick={() => handleDelete(section.type, item.id)}
@@ -776,24 +789,6 @@ export default function EditResume() {
                           placeholder="Duration"
                         />
                       )}
-                      {item.date && (
-                        <input
-                          type="text"
-                          value={item.date}
-                          onChange={(e) => {
-                            const newData = (
-                              data[section.type as keyof ResumeData] as any[]
-                            ).map((dataItem: any) =>
-                              dataItem.id === item.id
-                                ? { ...dataItem, date: e.target.value }
-                                : dataItem
-                            );
-                            handleSave(section.type, newData);
-                          }}
-                          className="w-32 p-2 border rounded hover-border transition-colors duration-200"
-                          placeholder="Date"
-                        />
-                      )}
                     </div>
                     <div className="flex gap-2 items-center">
                       <span className="text-sm font-medium">Link:</span>
@@ -859,15 +854,25 @@ export default function EditResume() {
                   <>
                     <div className="flex justify-between">
                       <div className="font-bold">
-                        {item.title || item.name}
-                        {item.company && ` | ${item.company}`}
-                        {(item.link.text || item.link.url) && " | "}
-                        {renderLink(item.link, section.type, item.id)}
+                        {section.type === "experience" ? (
+                          <>{item.title}</>
+                        ) : (
+                          <>
+                            {item.title}
+                            {item.link.text && (
+                              <span className="ml-2 inline-flex items-center">
+                                <LinkIcon className="w-3 h-3 text-[#26B6A5] mr-1" />
+                                {renderLink(item.link, section.type, item.id)}
+                              </span>
+                            )}
+                          </>
+                        )}
                       </div>
-                      <div className="font-bold">
-                        {item.duration || item.date}
-                      </div>
+                      <div className="text-right">{item.duration}</div>
                     </div>
+                    {section.type === "experience" && (
+                      <div className="text-sm">{item.company}</div>
+                    )}
                     {item.points && (
                       <ul className="list-disc ml-5 mt-1">
                         {item.points.map((point: string, index: number) => (
@@ -877,6 +882,119 @@ export default function EditResume() {
                         ))}
                       </ul>
                     )}
+                    {item.description && (
+                      <div className="text-sm mt-1">{item.description}</div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      case "certificates":
+        return (
+          <div className="group relative mb-6">
+            {data.certificates.map((item) => (
+              <div
+                key={item.id}
+                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#26B6A5]"
+              >
+                <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
+                  <button
+                    onClick={() => handleEdit("certificates", item.id)}
+                    className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete("certificates", item.id)}
+                    className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
+                </div>
+                {editingSection === "certificates" && editingId === item.id ? (
+                  <div
+                    className="space-y-2"
+                    data-section="certificates"
+                    data-id={item.id}
+                  >
+                    <div className="flex gap-4">
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(e) => {
+                          const newData = data.certificates.map((cert) =>
+                            cert.id === item.id
+                              ? { ...cert, name: e.target.value }
+                              : cert
+                          );
+                          handleSave("certificates", newData);
+                        }}
+                        className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="Certificate Name"
+                      />
+                      <input
+                        type="text"
+                        value={item.date}
+                        onChange={(e) => {
+                          const newData = data.certificates.map((cert) =>
+                            cert.id === item.id
+                              ? { ...cert, date: e.target.value }
+                              : cert
+                          );
+                          handleSave("certificates", newData);
+                        }}
+                        className="w-32 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="Date"
+                      />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <span className="text-sm font-medium">Link:</span>
+                      {renderLink(item.link, "certificates", item.id)}
+                    </div>
+                    <textarea
+                      value={item.description}
+                      onChange={(e) => {
+                        const newData = data.certificates.map((cert) =>
+                          cert.id === item.id
+                            ? { ...cert, description: e.target.value }
+                            : cert
+                        );
+                        handleSave("certificates", newData);
+                      }}
+                      className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                      rows={4}
+                      placeholder="Description"
+                    />
+                    <div className="flex justify-end mt-2 space-x-2">
+                      <button
+                        onClick={() => handleCloseEdit()}
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <X className="w-4 h-4 text-red-600" />
+                      </button>
+                      <button
+                        onClick={() => handleCloseEdit()}
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <Check className="w-4 h-4 text-green-600" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between">
+                      <div className="font-bold">
+                        {item.name}
+                        {item.link.text && (
+                          <span className="ml-2">
+                            {renderLink(item.link, "certificates", item.id)}
+                          </span>
+                        )}
+                      </div>
+                      <div>{item.date}</div>
+                    </div>
                     {item.description && (
                       <div className="text-sm mt-1">{item.description}</div>
                     )}
@@ -896,7 +1014,7 @@ export default function EditResume() {
                     onClick={() => handleEdit("custom", item.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-gray-600" />
+                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
                   </button>
                   <button
                     onClick={() => handleDelete("custom", item.id)}
@@ -907,7 +1025,7 @@ export default function EditResume() {
                 </div>
                 {editingSection === "custom" && editingId === item.id ? (
                   <div
-                    className="space-y-2  "
+                    className="space-y-2"
                     data-section="custom"
                     data-id={item.id}
                   >
@@ -975,12 +1093,12 @@ export default function EditResume() {
         input:focus,
         textarea:focus {
           outline: none;
-          border-color: #356cb5;
-          box-shadow: 0 0 0 2px rgba(53, 108, 181, 0.2);
+          border-color: #26b6a5;
+          box-shadow: 0 0 0 2px rgba(38, 182, 165, 0.2);
         }
         .hover-border:hover {
-          border-color: #356cb5;
-          border: 2px solid #356cb5;
+          border-color: #26b6a5;
+          border: 2px solid #26b6a5;
         }
       `}</style>
       {/* Personal Info Section */}
@@ -997,7 +1115,7 @@ export default function EditResume() {
             {editingSection === "personalInfo" ? (
               <Check className="w-5 h-5 text-green-600" />
             ) : (
-              <Edit2 className="w-5 h-5 text-gray-600" />
+              <Edit2 className="w-5 h-5 text-[#26B6A5]" />
             )}
           </button>
           {editingSection === "personalInfo" && (
@@ -1022,6 +1140,18 @@ export default function EditResume() {
               }
               className="w-full p-2 border rounded hover-border transition-colors duration-200 text-2xl font-bold"
               placeholder="Name"
+            />
+            <input
+              type="text"
+              value={data.personalInfo.title}
+              onChange={(e) =>
+                setData((prev) => ({
+                  ...prev,
+                  personalInfo: { ...prev.personalInfo, title: e.target.value },
+                }))
+              }
+              className="w-full p-2 border rounded hover-border transition-colors duration-200"
+              placeholder="Title/Position"
             />
             <div className="space-y-2">
               {Object.entries(data.personalInfo.links).map(([key, link]) => (
@@ -1098,7 +1228,7 @@ export default function EditResume() {
                     },
                   }));
                 }}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                className="flex items-center gap-2 text-[#26B6A5] hover:text-[#1a8a7c]"
               >
                 <Plus className="w-5 h-5" /> Add new link
               </button>
@@ -1106,24 +1236,56 @@ export default function EditResume() {
           </div>
         ) : (
           <div className="hover-border-resume p-2">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
               {data.personalInfo.name}
             </h1>
-            <div className="mt-2 space-y-1 grid grid-cols-2 gap-2 justify-between">
-              {Object.entries(data.personalInfo.links).map(([key, link]) => (
-                <div key={key} className="text-blue-600">
-                  {link.text}:{" "}
-                  <a href={link.url} className="text-blue-600 hover:underline">
-                    {link.url}
+            <p className="text-center text-sm mb-4">
+              {data.personalInfo.title}
+            </p>
+            <div className="flex justify-center gap-4 text-sm">
+              {data.personalInfo.links.email && (
+                <div className="flex items-center gap-1 text-[#26B6A5]">
+                  <Mail className="w-4 h-4" />
+                  <a
+                    href={`mailto:${data.personalInfo.links.email.url}`}
+                    className="hover:underline"
+                  >
+                    {data.personalInfo.links.email.text}
                   </a>
                 </div>
-              ))}
+              )}
+              {data.personalInfo.links.phone && (
+                <div className="flex items-center gap-1 text-[#26B6A5]">
+                  <Phone className="w-4 h-4" />
+                  <a
+                    href={`tel:${data.personalInfo.links.phone.url}`}
+                    className="hover:underline"
+                  >
+                    {data.personalInfo.links.phone.text}
+                  </a>
+                </div>
+              )}
+              {data.personalInfo.links.location && (
+                <div className="flex items-center gap-1 text-[#26B6A5]">
+                  <MapPin className="w-4 h-4" />
+                  <span>{data.personalInfo.links.location.text}</span>
+                </div>
+              )}
+              {data.personalInfo.links.linkedin && (
+                <div className="flex items-center gap-1 text-[#26B6A5]">
+                  <Linkedin className="w-4 h-4" />
+                  <a
+                    href={`https://linkedin.com/in/${data.personalInfo.links.linkedin.url}`}
+                    className="hover:underline"
+                  >
+                    {data.personalInfo.links.linkedin.text}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
-
-      <hr className="border-t border-gray-300 my-6" />
 
       <DndContext
         sensors={sensors}
@@ -1144,7 +1306,7 @@ export default function EditResume() {
                     {renderSection(section)}
                   </div>
                   {index < data.sections.length - 1 && (
-                    <hr className="border-t border-gray-300 my-6" />
+                    <hr className="border-t border-gray-200 my-4" />
                   )}
                 </SortableItem>
               )
@@ -1152,7 +1314,7 @@ export default function EditResume() {
         </SortableContext>
         <DragOverlay>
           {activeId ? (
-            <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-blue-500">
+            <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-[#26B6A5]">
               {data.sections.find((section) => section.id === activeId)?.title}
             </div>
           ) : null}
@@ -1163,9 +1325,9 @@ export default function EditResume() {
       <div className="relative mt-8 pt-6 border-t border-gray-300">
         <button
           onClick={handleAddSection}
-          className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6ECF8] px-4 py-2 flex items-center gap-2 text-sm  hover:text-primary/90 border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
+          className="absolute left-1/2 top-0 text-[#26B6A5] transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
         >
-          <Plus className="w-5 h-5 text-primary" />
+          <Plus className="w-5 h-5 text-[#26B6A5]" />
           Add New Section
         </button>
       </div>
