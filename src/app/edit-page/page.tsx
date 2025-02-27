@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import EditResume from "@/components/ui/edit-resume";
 import { CircleUser, Play, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const ResumePage = () => {
@@ -25,9 +26,14 @@ const ResumePage = () => {
           <X className="w-5 h-5  text-primary " />
           <span className="text-primary font-normal">Cancel</span>
         </Button>
-        <Button className="bg-primary text-white h-[50]  flex items-center justify-center">
-          <Play className="w-5 h-5  text-white" />
-          <span className="text-white font-normal">Preview</span>
+        <Button
+          className="bg-primary text-white h-[50]  flex items-center justify-center"
+          asChild
+        >
+          <Link href="/preview">
+            <Play className="w-5 h-5  text-white" />
+            <span className="text-white font-normal">Preview</span>
+          </Link>
         </Button>
       </div>
       <EditResume />
