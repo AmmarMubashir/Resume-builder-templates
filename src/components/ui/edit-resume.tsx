@@ -28,6 +28,8 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
+import { useResumeContext } from "@/context/ResumeContext";
 
 const initialSections: Section[] = [
   { id: "1", title: "EDUCATION", isVisible: true, type: "education" },
@@ -156,6 +158,9 @@ export default function EditResume() {
   } | null>(null);
 
   const [activeId, setActiveId] = useState(null);
+
+  const { setResumeData } = useResumeContext();
+  setResumeData(data);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

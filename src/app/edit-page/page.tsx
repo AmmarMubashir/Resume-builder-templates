@@ -1,12 +1,13 @@
+import { Button } from "@/components/ui/button";
+import EditResume from "@/components/ui/edit-resume";
 import { CircleUser, Play, X } from "lucide-react";
-import React from "react";
-import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
-const EditLayout = () => {
+const ResumePage = () => {
   return (
-    <>
+    <div className="flex flex-col gap-1 ">
       <nav className="flex items-center justify-between px-2 sm:max-w-7xl sm:px-4 py-4">
         <span className="hidden md:opacity-0 md:block">Rezlinks</span>
         <div className="flex gap-2">
@@ -35,8 +36,9 @@ const EditLayout = () => {
           </Link>
         </Button>
       </div>
-    </>
+      <EditResume />
+    </div>
   );
 };
 
-export default EditLayout;
+export default ResumePage;
