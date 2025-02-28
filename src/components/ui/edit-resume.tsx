@@ -2,6 +2,7 @@
 
 import type React from "react";
 
+import { toast } from "sonner";
 import { useState } from "react";
 import {
   Edit2,
@@ -31,6 +32,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useResumeContext } from "@/context/ResumeContext";
+import { formatDate } from "@/lib/utils";
 
 // Define types
 interface CustomSectionItem {
@@ -67,7 +69,10 @@ interface Experience {
   title: string;
   company: string;
   link: Link;
-  duration: string;
+
+  startDate: string;
+  endDate: string;
+
   points: string[];
 }
 
@@ -75,7 +80,9 @@ interface Project {
   id: string;
   title: string;
   link: Link;
-  duration: string;
+
+  startDate: string;
+  endDate: string;
   points: string[];
 }
 
@@ -108,6 +115,12 @@ interface ResumeData {
   certificates: Certificate[];
   customSections: CustomSection[];
 }
+
+// Validation constants
+const MAX_POINTS = 5;
+const MAX_POINT_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 300;
+const MAX_SKILLS_PER_CATEGORY = 10;
 
 const initialSections: Section[] = [
   { id: "1", title: "EDUCATION", isVisible: true, type: "education" },
@@ -162,7 +175,9 @@ const initialData: ResumeData = {
       title: "BUSINESS ANALYST INTERN",
       company: "WS",
       link: { text: "LINK", url: "#" },
-      duration: "January 24- March 24",
+
+      startDate: "03/02/2024",
+      endDate: "03/02/2024",
       points: [
         "Streamlined data collection and reporting procedures, reducing processing time by 20% enhancing efficiency.",
         "Implemented process improvements and automation solutions, resulting in 15% increase in productivity.",
@@ -175,7 +190,9 @@ const initialData: ResumeData = {
       id: "1",
       title: "Student Performance Prediction",
       link: { text: "LINK", url: "#" },
-      duration: "December 23- February 2024",
+
+      startDate: "03/02/2024",
+      endDate: "03/02/2024",
       points: [
         "Achieved a 96% accuracy in predicting student performance using machine learning.",
         "Managed data integration from multiple sources, improving data quality by 30%.",
@@ -187,7 +204,7 @@ const initialData: ResumeData = {
       id: "1",
       name: "Programming in Python (Meta)",
       link: { text: "CERTIFICATE", url: "#" },
-      date: "March 2023",
+      date: "02/27/2025",
       description:
         "Mastered fundamental Python syntax, proficiently utilizing control flow, loops, functions, and data structures.",
     },
@@ -205,6 +222,202 @@ const initialData: ResumeData = {
       ],
     },
   ],
+};
+
+// Validation functions
+const validatePersonalInfo = (personalInfo: PersonalInfo): boolean => {
+  if (!personalInfo.name.trim()) {
+    toast.error("Name cannot be empty");
+    return false;
+  }
+
+  // Check if at least one link has both text and URL
+  const hasValidLink = Object.values(personalInfo.links).some(
+    (link) => link.text.trim() && link.url.trim()
+  );
+
+  if (!hasValidLink) {
+    toast.error("At least one contact method must be provided");
+    return false;
+  }
+
+  return true;
+};
+
+const validateEducation = (education: Education): boolean => {
+  if (!education.institution.trim()) {
+    toast.error("Institution name cannot be empty");
+    return false;
+  }
+
+  if (!education.degree.trim()) {
+    toast.error("Degree cannot be empty");
+    return false;
+  }
+
+  if (!education.startDate.trim() || !education.endDate.trim()) {
+    toast.error("Start and end dates are required");
+    return false;
+  }
+
+  return true;
+};
+
+const validateExperience = (experience: Experience): boolean => {
+  if (!experience.title.trim()) {
+    toast.error("Job title cannot be empty");
+    return false;
+  }
+
+  if (!experience.company.trim()) {
+    toast.error("Company name cannot be empty");
+    return false;
+  }
+
+  if (!experience.startDate.trim()) {
+    toast.error("Start date cannot be empty");
+    return false;
+  }
+
+  if (!experience.endDate.trim()) {
+    toast.error("End date cannot be empty");
+    return false;
+  }
+
+  if (
+    experience.points.length === 0 ||
+    !experience.points.some((point) => point.trim())
+  ) {
+    toast.error("At least one bullet point is required");
+    return false;
+  }
+
+  if (experience.points.length > MAX_POINTS) {
+    toast.error(`Maximum ${MAX_POINTS} bullet points allowed`);
+    return false;
+  }
+
+  for (const point of experience.points) {
+    if (point.length > MAX_POINT_LENGTH) {
+      toast.error(
+        `Bullet points must be less than ${MAX_POINT_LENGTH} characters`
+      );
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const validateProject = (project: Project): boolean => {
+  if (!project.title.trim()) {
+    toast.error("Project title cannot be empty");
+    return false;
+  }
+
+  if (!project.startDate.trim()) {
+    toast.error("Project start date cannot be empty");
+    return false;
+  }
+
+  if (!project.endDate.trim()) {
+    toast.error("Project end date cannot be empty");
+    return false;
+  }
+
+  if (
+    project.points.length === 0 ||
+    !project.points.some((point) => point.trim())
+  ) {
+    toast.error("At least one bullet point is required");
+    return false;
+  }
+
+  if (project.points.length > MAX_POINTS) {
+    toast.error(`Maximum ${MAX_POINTS} bullet points allowed`);
+    return false;
+  }
+
+  for (const point of project.points) {
+    if (point.length > MAX_POINT_LENGTH) {
+      toast.error(
+        `Bullet points must be less than ${MAX_POINT_LENGTH} characters`
+      );
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const validateCertificate = (certificate: Certificate): boolean => {
+  if (!certificate.name.trim()) {
+    toast.error("Certificate name cannot be empty");
+    return false;
+  }
+
+  if (!certificate.date.trim()) {
+    toast.error("Certificate date cannot be empty");
+    return false;
+  }
+
+  if (!certificate.description.trim()) {
+    toast.error("Certificate description cannot be empty");
+    return false;
+  }
+
+  if (certificate.description.length > MAX_DESCRIPTION_LENGTH) {
+    toast.error(
+      `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`
+    );
+    return false;
+  }
+
+  return true;
+};
+
+const validateSkills = (skills: Skills): boolean => {
+  if (Object.keys(skills).length === 0) {
+    toast.error("At least one skill category is required");
+    return false;
+  }
+
+  for (const [category, skillList] of Object.entries(skills)) {
+    if (skillList.length === 0) {
+      toast.error(`Skill category '${category}' cannot be empty`);
+      return false;
+    }
+
+    if (skillList.length > MAX_SKILLS_PER_CATEGORY) {
+      toast.error(
+        `Maximum ${MAX_SKILLS_PER_CATEGORY} skills allowed per category`
+      );
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const validateCustomItem = (item: CustomSectionItem): boolean => {
+  if (!item.title.trim()) {
+    toast.error("Item title cannot be empty");
+    return false;
+  }
+
+  if (!item.content.trim()) {
+    toast.error("Item content cannot be empty");
+    return false;
+  }
+
+  if (item.content.length > MAX_DESCRIPTION_LENGTH) {
+    toast.error(
+      `Content must be less than ${MAX_DESCRIPTION_LENGTH} characters`
+    );
+    return false;
+  }
+
+  return true;
 };
 
 const DragHandle = ({ id }: { id: string }) => {
@@ -228,8 +441,7 @@ const SortableItem = ({
   id: string;
   children: React.ReactNode;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+  const { setNodeRef, transform, transition } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -364,7 +576,8 @@ export default function EditResume() {
           title: "",
           company: "",
           link: { text: "", url: "" },
-          duration: "",
+          startDate: "",
+          endDate: "",
           points: [""],
         };
         break;
@@ -373,7 +586,8 @@ export default function EditResume() {
           ...newItem,
           title: "",
           link: { text: "", url: "" },
-          duration: "",
+          startDate: "",
+          endDate: "",
           points: [""],
         };
         break;
@@ -493,6 +707,11 @@ export default function EditResume() {
 
   const handleCloseEdit = (confirm = false) => {
     if (newCustomSection && confirm && editingSection === "customSection") {
+      if (!newCustomSection.sectionTitle.trim()) {
+        toast.error("Section title cannot be empty");
+        return;
+      }
+
       const newSection: Section = {
         id: newCustomSection.id,
         title: newCustomSection.sectionTitle,
@@ -506,7 +725,12 @@ export default function EditResume() {
         customSections: [...prev.customSections, newCustomSection],
       }));
       setNewCustomSection(null);
+      toast.success("New section added successfully");
     } else if (newCustomItem && confirm && editingSection === "customItem") {
+      if (!validateCustomItem(newCustomItem.item)) {
+        return;
+      }
+
       setData((prev: ResumeData) => {
         const updatedCustomSections = prev.customSections.map((section) => {
           if (section.id === newCustomItem.sectionId) {
@@ -523,6 +747,67 @@ export default function EditResume() {
         };
       });
       setNewCustomItem(null);
+      toast.success("New item added successfully");
+    } else if (editingSection && editingId && confirm) {
+      // Validate the edited item before closing
+      let isValid = true;
+
+      switch (editingSection) {
+        case "personalInfo":
+          const personalInfo = data.personalInfo;
+          isValid = validatePersonalInfo(personalInfo);
+          break;
+
+        case "education":
+          const education = data.education.find((e) => e.id === editingId);
+          if (education) {
+            isValid = validateEducation(education);
+          }
+          break;
+        case "experience":
+          const experience = data.experience.find((e) => e.id === editingId);
+          if (experience) {
+            isValid = validateExperience(experience);
+          }
+          break;
+        case "projects":
+          const project = data.projects.find((p) => p.id === editingId);
+          if (project) {
+            isValid = validateProject(project);
+          }
+          break;
+        case "certificates":
+          const certificate = data.certificates.find((c) => c.id === editingId);
+          if (certificate) {
+            isValid = validateCertificate(certificate);
+          }
+          break;
+        case "skills":
+          isValid = validateSkills(data.skills);
+          break;
+        case "customItem":
+          if (editingSectionId) {
+            const customSection = data.customSections.find(
+              (cs) => cs.id === editingSectionId
+            );
+            if (customSection) {
+              const item = customSection.items.find((i) => i.id === editingId);
+              if (item) {
+                isValid = validateCustomItem(item);
+              }
+            }
+          }
+          break;
+        case "personalInfo":
+          isValid = validatePersonalInfo(data.personalInfo);
+          break;
+      }
+
+      if (!isValid) {
+        return;
+      }
+
+      toast.success("Changes saved successfully");
     }
 
     setEditingSection(null);
@@ -557,10 +842,21 @@ export default function EditResume() {
                       : prev.customSections,
                 }));
               }}
-              onBlur={() => setEditingTitle(null)}
               className="w-full p-2 border rounded hover-border transition-colors duration-200 text-center font-bold text-lg"
               autoFocus
             />
+            <button
+              onClick={() => {
+                if (!section.title.trim()) {
+                  toast.error("Section title cannot be empty");
+                  return;
+                }
+                setEditingTitle(null);
+              }}
+              className="p-2 mr-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Check className="w-4 h-4 text-green-600" />
+            </button>
           </div>
         ) : (
           <h2 className="text-xl font-bold text-gray-800">{section.title}</h2>
@@ -707,6 +1003,20 @@ export default function EditResume() {
                       className="w-full p-2 border rounded hover-border transition-colors duration-200"
                       placeholder="Institution"
                     />
+                    <input
+                      type="text"
+                      value={edu.location}
+                      onChange={(e) => {
+                        const newEducation = data.education.map((item) =>
+                          item.id === edu.id
+                            ? { ...item, location: e.target.value }
+                            : item
+                        );
+                        handleSave("education", newEducation);
+                      }}
+                      className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                      placeholder="Location"
+                    />
                     <div className="flex gap-4">
                       <input
                         type="text"
@@ -739,7 +1049,7 @@ export default function EditResume() {
                     </div>
                     <div className="flex gap-4">
                       <input
-                        type="text"
+                        type="date"
                         value={edu.startDate}
                         onChange={(e) => {
                           const newEducation = data.education.map((item) =>
@@ -753,7 +1063,7 @@ export default function EditResume() {
                         placeholder="Start Date"
                       />
                       <input
-                        type="text"
+                        type="date"
                         value={edu.endDate}
                         onChange={(e) => {
                           const newEducation = data.education.map((item) =>
@@ -768,12 +1078,6 @@ export default function EditResume() {
                       />
                     </div>
                     <div className="flex justify-end mt-2 space-x-2">
-                      <button
-                        onClick={() => handleCloseEdit(false)}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
                       <button
                         onClick={() => handleCloseEdit(true)}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
@@ -790,11 +1094,15 @@ export default function EditResume() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <div>
-                        {edu.degree}: GPA: {edu.gpa}
+                        {edu.degree && <span>{edu.degree}</span>}{" "}
+                        {edu.gpa && <span>GPA: {edu.gpa}</span>}
                       </div>
-                      <div className="font-bold">
-                        {edu.startDate} - {edu.endDate}
-                      </div>
+                      {edu.startDate && edu.endDate && (
+                        <div className="font-bold">
+                          {formatDate(edu.startDate)} -{" "}
+                          {formatDate(edu.endDate)}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -852,12 +1160,6 @@ export default function EditResume() {
                 </button>
                 <div className="flex justify-end mt-2 space-x-2">
                   <button
-                    onClick={() => handleCloseEdit(false)}
-                    className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <X className="w-4 h-4 text-red-600" />
-                  </button>
-                  <button
                     onClick={() => handleCloseEdit(true)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
@@ -886,6 +1188,8 @@ export default function EditResume() {
             )}
           </div>
         );
+
+      //    EDITING AND SHOWING SECTIONS------------------------------------>
       case "experience":
       case "projects":
       case "certificates":
@@ -920,27 +1224,54 @@ export default function EditResume() {
                         data-id={item.id}
                       >
                         <div className="flex gap-4">
-                          <input
-                            type="text"
-                            value={item.title || item.name}
-                            onChange={(e) => {
-                              const newData = (
-                                data[section.type as keyof ResumeData] as any[]
-                              ).map((dataItem: any) =>
-                                dataItem.id === item.id
-                                  ? {
-                                      ...dataItem,
-                                      [item.title ? "title" : "name"]:
-                                        e.target.value,
-                                    }
-                                  : dataItem
-                              );
-                              handleSave(section.type, newData);
-                            }}
-                            className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
-                            placeholder={item.title ? "Title" : "Name"}
-                          />
-                          {item.company && (
+                          {(section.type === "projects" ||
+                            section.type === "experience") && (
+                            <input
+                              type="text"
+                              value={item.title}
+                              onChange={(e) => {
+                                const newData = (
+                                  data[
+                                    section.type as keyof ResumeData
+                                  ] as any[]
+                                ).map((dataItem: any) =>
+                                  dataItem.id === item.id
+                                    ? {
+                                        ...dataItem,
+                                        title: e.target.value,
+                                      }
+                                    : dataItem
+                                );
+                                handleSave(section.type, newData);
+                              }}
+                              className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                              placeholder={"Title"}
+                            />
+                          )}
+                          {section.type === "certificates" && (
+                            <input
+                              type="text"
+                              value={item.name}
+                              onChange={(e) => {
+                                const newData = (
+                                  data[
+                                    section.type as keyof ResumeData
+                                  ] as any[]
+                                ).map((dataItem: any) =>
+                                  dataItem.id === item.id
+                                    ? {
+                                        ...dataItem,
+                                        name: e.target.value,
+                                      }
+                                    : dataItem
+                                );
+                                handleSave(section.type, newData);
+                              }}
+                              className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                              placeholder={"Name"}
+                            />
+                          )}
+                          {section.type === "certificates" && (
                             <input
                               type="text"
                               value={item.company}
@@ -960,10 +1291,13 @@ export default function EditResume() {
                               placeholder="Company"
                             />
                           )}
-                          {item.duration && (
+
+                          {(section.type === "projects" ||
+                            section.type === "experience") && (
                             <input
-                              type="text"
-                              value={item.duration}
+                              type="date"
+                              value={item.startDate}
+                              placeholder="Start Date"
                               onChange={(e) => {
                                 const newData = (
                                   data[
@@ -971,16 +1305,37 @@ export default function EditResume() {
                                   ] as any[]
                                 ).map((dataItem: any) =>
                                   dataItem.id === item.id
-                                    ? { ...dataItem, duration: e.target.value }
+                                    ? { ...dataItem, startDate: e.target.value }
+                                    : dataItem
+                                );
+                                handleSave(section.type, newData);
+                              }}
+                              className="w-32  p-2 border rounded hover-border transition-colors duration-200"
+                            />
+                          )}
+                          {(section.type === "projects" ||
+                            section.type === "experience") && (
+                            <input
+                              type="date"
+                              value={item.endDate}
+                              placeholder="End Date"
+                              onChange={(e) => {
+                                const newData = (
+                                  data[
+                                    section.type as keyof ResumeData
+                                  ] as any[]
+                                ).map((dataItem: any) =>
+                                  dataItem.id === item.id
+                                    ? { ...dataItem, endDate: e.target.value }
                                     : dataItem
                                 );
                                 handleSave(section.type, newData);
                               }}
                               className="w-32 p-2 border rounded hover-border transition-colors duration-200"
-                              placeholder="Duration"
                             />
                           )}
-                          {item.date && (
+
+                          {section.type === "certificates" && (
                             <input
                               type="date"
                               value={item.date}
@@ -1005,7 +1360,30 @@ export default function EditResume() {
                           <span className="text-sm font-medium">Link:</span>
                           {renderLink(item.link, section.type, item.id)}
                         </div>
-                        {item.points && (
+
+                        {section.type === "experience" && (
+                          <input
+                            type="text"
+                            value={item.company}
+                            onChange={(e) => {
+                              const newData = (
+                                data[section.type as keyof ResumeData] as any[]
+                              ).map((dataItem: any) =>
+                                dataItem.id === item.id
+                                  ? {
+                                      ...dataItem,
+                                      company: e.target.value,
+                                    }
+                                  : dataItem
+                              );
+                              handleSave(section.type, newData);
+                            }}
+                            className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                            placeholder="Company"
+                          />
+                        )}
+                        {(section.type === "projects" ||
+                          section.type === "experience") && (
                           <textarea
                             value={item.points.join("\n")}
                             onChange={(e) => {
@@ -1015,9 +1393,7 @@ export default function EditResume() {
                                 dataItem.id === item.id
                                   ? {
                                       ...dataItem,
-                                      points: e.target.value
-                                        .split("\n")
-                                        .filter(Boolean),
+                                      points: e.target.value.split("\n"), // Keep empty lines
                                     }
                                   : dataItem
                               );
@@ -1028,7 +1404,7 @@ export default function EditResume() {
                             placeholder="Enter points (one per line)"
                           />
                         )}
-                        {item.description && (
+                        {section.type === "certificates" && (
                           <textarea
                             value={item.description}
                             onChange={(e) => {
@@ -1048,12 +1424,6 @@ export default function EditResume() {
                         )}
                         <div className="flex justify-end mt-2 space-x-2">
                           <button
-                            onClick={() => handleCloseEdit(false)}
-                            className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                          >
-                            <X className="w-4 h-4 text-red-600" />
-                          </button>
-                          <button
                             onClick={() => handleCloseEdit(true)}
                             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                           >
@@ -1071,7 +1441,11 @@ export default function EditResume() {
                             {renderLink(item.link, section.type, item.id)}
                           </div>
                           <div className="font-bold">
-                            {item.duration || item.date}
+                            {item?.date && formatDate(item.date)}
+                            {(item.startDate || item.endDate) &&
+                              `${formatDate(item.startDate)} - ${formatDate(
+                                item.endDate
+                              )}`}
                           </div>
                         </div>
                         {item.points && (
@@ -1177,12 +1551,6 @@ export default function EditResume() {
                     />
                     <div className="flex justify-end mt-2 space-x-2">
                       <button
-                        onClick={() => handleCloseEdit(false)}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
                         onClick={() => handleCloseEdit(true)}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
@@ -1241,12 +1609,6 @@ export default function EditResume() {
                   />
                   <div className="flex justify-end mt-2 space-x-2">
                     <button
-                      onClick={() => handleCloseEdit(false)}
-                      className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <X className="w-4 h-4 text-red-600" />
-                    </button>
-                    <button
                       onClick={() => handleCloseEdit(true)}
                       className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                     >
@@ -1280,11 +1642,20 @@ export default function EditResume() {
       <div className="group relative mb-8">
         <div className="absolute hidden group-hover:flex gap-2 -right-4 -top-2">
           <button
-            onClick={() =>
+            onClick={() => {
+              if (editingSection === "personalInfo") {
+                if (validatePersonalInfo(data.personalInfo)) {
+                  toast.success("Changes saved successfully");
+                } else {
+                  toast.error("Title cannot be empty");
+                  return;
+                }
+              }
+
               setEditingSection(
                 editingSection === "personalInfo" ? null : "personalInfo"
-              )
-            }
+              );
+            }}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
             {editingSection === "personalInfo" ? (
@@ -1293,14 +1664,6 @@ export default function EditResume() {
               <Edit2 className="w-5 h-5 text-gray-600" />
             )}
           </button>
-          {editingSection === "personalInfo" && (
-            <button
-              onClick={() => setEditingSection(null)}
-              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-            >
-              <X className="w-5 h-5 text-red-600" />
-            </button>
-          )}
         </div>
         {editingSection === "personalInfo" ? (
           <div className="space-y-4">
@@ -1468,12 +1831,6 @@ export default function EditResume() {
             placeholder="Section Title"
           />
           <div className="flex justify-end mt-4 space-x-2">
-            <button
-              onClick={() => handleCloseEdit(false)}
-              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-            >
-              <X className="w-4 h-4 text-red-600" />
-            </button>
             <button
               onClick={() => handleCloseEdit(true)}
               className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
