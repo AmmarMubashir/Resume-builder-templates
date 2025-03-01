@@ -1624,6 +1624,8 @@ export default function EditResume() {
     }
   };
 
+  const [preview, showPreview] = useState(false);
+
   return (
     <div className="max-w-[850px] mx-auto p-8 bg-white mb-4 shadow-lg rounded-lg">
       <style jsx global>{`
@@ -1639,6 +1641,7 @@ export default function EditResume() {
         }
       `}</style>
       {/* Personal Info Section */}
+
       <div className="group relative mb-8">
         <div className="absolute hidden group-hover:flex gap-2 -right-4 -top-2">
           <button

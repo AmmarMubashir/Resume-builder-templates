@@ -28,7 +28,7 @@ export interface ResumeData {
   achievements?: any[];
   projects: any[];
   certificates: any[];
-  custom: any[];
+  customSections: any[];
 }
 export interface Link {
   text: string;

@@ -4,6 +4,7 @@ import React, { RefObject, useRef } from "react";
 import type { ResumeData, Section, Link } from "./types";
 import useDimensions from "@/hooks/useDimension";
 import { cn } from "@/lib/utils";
+import { LinkIcon } from "lucide-react";
 
 interface resumeDataProps {
   contentRef?: React.Ref<HTMLDivElement>;
@@ -25,6 +26,20 @@ const ResumePreview = ({ contentRef, resumeData }: resumeDataProps) => {
       <div className="hidden group-hover:flex gap-2"></div>
     </div>
   );
+
+  const renderLink = (link: Link, section: string, id: string) => {
+    return (
+      <span className="inline-flex items-center gap-1">
+        {link.text && link.url && (
+          <>
+            <a href={link.url} className="text-blue-600 hover:underline">
+              {link.text}
+            </a>
+          </>
+        )}
+      </span>
+    );
+  };
 
   const renderSection = (section: Section) => {
     switch (section.type) {
@@ -82,7 +97,7 @@ const ResumePreview = ({ contentRef, resumeData }: resumeDataProps) => {
                       {item.title || item.name}
                       {item.company && ` | ${item.company}`}
                       {(item.link.text || item.link.url) && " | "}
-                      {/* {renderLink(item.link, section.type, item.id)} */}
+                      {renderLink(item.link, section.type, item.id)}
                     </div>
                     <div className="font-bold">
                       {item.duration || item.date}
@@ -105,14 +120,31 @@ const ResumePreview = ({ contentRef, resumeData }: resumeDataProps) => {
             ))}
           </div>
         );
-      case "custom":
+      case "customSection":
+        const customSection = resumeData.customSections.find(
+          (cs: any) => cs.id === section.id
+        );
+        if (!customSection) return null;
         return (
           <div className="group relative mb-1">
-            {resumeData.custom.map((item: any) => (
+            {customSection.items.map((item: any) => (
               <div key={item.id} className="group/item relative p-2 ">
                 <>
                   <div className="font-bold">{item.title}</div>
                   <div className="text-sm mt-1">{item.content}</div>
+                  {/* {item &&
+                    item.items.map((section: any) => {
+                      return (
+                        <div key={section.id}>
+                          <div className="font-bold">{section.title}</div>
+                          <div className="text-sm mt-1">{section.content}</div>
+                        </div>
+                      );
+                    })} */}
+                  {/* {item.content && (
+                  <div className="font-bold">{item.sectionTitle}</div>
+                    <div className="text-sm mt-1">{item[0].content}</div>
+                  )} */}
                 </>
               </div>
             ))}
@@ -122,6 +154,8 @@ const ResumePreview = ({ contentRef, resumeData }: resumeDataProps) => {
         return null;
     }
   };
+
+  console.log(resumeData);
 
   // if (!resumeData) {
   //   console.log("JELLO");

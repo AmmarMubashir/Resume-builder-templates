@@ -17,7 +17,7 @@ const Preview = () => {
   });
 
   return (
-    <div className="w-full mx-auto px-3 py-6 bg-gray-300">
+    <div className="w-full mx-auto px-3 py-6 bg-black/50">
       <div className="flex items-center justify-end px-2 gap-2  w-full max-w-[850px] mx-auto sm:px-4 py-2 mb-3">
         <Button className="bg-[#E6ECF8] hover:bg-[#E6ECF8]/90 text-primary h-[50]  flex items-center justify-center">
           <Share className="w-5 h-5  text-primary " />
