@@ -1,8 +1,6 @@
 import EditLayout from "@/components/edit-layout";
-import { Button } from "@/components/ui/button";
-import EditResume from "@/components/ui/edit-resume";
-import { CircleUser, Play, X } from "lucide-react";
-import Image from "next/image";
+import EditResume from "@/components/template-1/edit-resume";
+
 import React from "react";
 
 const ResumePage = () => {

@@ -15,7 +15,7 @@ import {
   Linkedin,
   ExternalLink,
 } from "lucide-react";
-import type { ResumeData, Section, Link } from "../types";
+import type { ResumeData, Section, Link } from "./types";
 import {
   DndContext,
   closestCenter,
@@ -34,6 +34,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useResumeContext } from "@/context/ResumeContext";
+import { toast } from "sonner";
 
 const initialSections: Section[] = [
   { id: "1", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
@@ -133,6 +134,7 @@ const initialData: ResumeData = {
     },
   ],
   custom: [],
+  customSections: [],
 };
 
 const DragHandle = ({ id }: any) => {
@@ -174,10 +176,17 @@ export default function EditResume() {
     section: string;
     id: string;
   } | null>(null);
+  const [isAddingSection, setIsAddingSection] = useState(false);
+  const [newSectionTitle, setNewSectionTitle] = useState("");
+  const [editingCustomSection, setEditingCustomSection] = useState<
+    string | null
+  >(null);
+  const [isAddingCustomItem, setIsAddingCustomItem] = useState(false);
+  const [activeId, setActiveId] = useState(null);
 
   const { setResumeData } = useResumeContext();
+
   setResumeData(data);
-  const [activeId, setActiveId] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -347,26 +356,95 @@ export default function EditResume() {
   };
 
   const handleAddSection = () => {
+    setIsAddingSection(true);
+    setNewSectionTitle("");
+  };
+
+  const handleSaveNewSection = () => {
+    if (!newSectionTitle.trim()) {
+      toast.error("Section title cannot be empty");
+      return;
+    }
+
     const newId = Math.random().toString(36).substr(2, 9);
     const newSection: Section = {
       id: newId,
-      title: "New Section",
+      title: newSectionTitle,
       isVisible: true,
-      type: "custom",
+      type: "customSection",
     };
+
     setData((prev) => ({
       ...prev,
       sections: [...prev.sections, newSection],
-      custom: [
-        ...prev.custom,
-        { id: newId, title: "New Section", content: "" },
+      customSections: [
+        ...prev.customSections,
+        {
+          id: newId,
+          sectionTitle: newSectionTitle,
+          items: [],
+        },
       ],
     }));
-    setEditingSection("custom");
-    setEditingId(newId);
+
+    setNewSectionTitle("");
+    setIsAddingSection(false);
+    setEditingCustomSection(newId);
   };
 
-  // Update the renderSectionTitle function
+  const handleAddCustomItem = (sectionId: string) => {
+    if (!editingCustomSection) {
+      setEditingCustomSection(sectionId);
+    }
+
+    setIsAddingCustomItem(true);
+  };
+
+  const handleSaveCustomItem = (
+    sectionId: string,
+    title: string,
+    content: string
+  ) => {
+    if (!title.trim()) {
+      toast.error("Title cannot be empty");
+      return false;
+    }
+
+    if (!content.trim()) {
+      toast.error("Content cannot be empty");
+      return false;
+    }
+
+    const newItemId = Math.random().toString(36).substr(2, 9);
+
+    setData((prev) => ({
+      ...prev,
+      customSections: prev.customSections.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              items: [
+                ...section.items,
+                {
+                  id: newItemId,
+                  title,
+                  content,
+                },
+              ],
+            }
+          : section
+      ),
+    }));
+
+    setIsAddingCustomItem(false);
+    return true;
+  };
+
+  const handleCloseEdit = () => {
+    setEditingSection(null);
+    setEditingId(null);
+  };
+
   const renderSectionTitle = (section: Section) => (
     <div className="flex justify-between items-center mb-4 group relative">
       <DragHandle id={section.id} />
@@ -397,13 +475,22 @@ export default function EditResume() {
         )}
       </div>
       <div className="hidden group-hover:flex gap-2">
-        {section.type !== "skills" && (
+        {section.type === "customSection" ? (
           <button
-            onClick={() => handleAdd(section.type)}
+            onClick={() => handleAddCustomItem(section.id)}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
             <Plus className="w-4 h-4 text-primary" />
           </button>
+        ) : (
+          section.type !== "skills" && (
+            <button
+              onClick={() => handleAdd(section.type)}
+              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Plus className="w-4 h-4 text-primary" />
+            </button>
+          )
         )}
         <button
           onClick={() => handleEditSectionTitle(section.id)}
@@ -487,11 +574,6 @@ export default function EditResume() {
         )}
       </span>
     );
-  };
-
-  const handleCloseEdit = () => {
-    setEditingSection(null);
-    setEditingId(null);
   };
 
   const renderSection = (section: Section) => {
@@ -844,7 +926,7 @@ export default function EditResume() {
                     <div className="flex justify-end mt-2 space-x-2">
                       <button
                         onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray  transition-colors duration-200"
                       >
                         <X className="w-4 h-4 text-red-600" />
                       </button>
@@ -1087,6 +1169,199 @@ export default function EditResume() {
             ))}
           </div>
         );
+      case "customSection":
+        const customSection = data.customSections.find(
+          (cs) => cs.id === section.id
+        );
+        return (
+          <div className="group relative mb-6">
+            {customSection && (
+              <>
+                {customSection.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-primary mb-4"
+                  >
+                    <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
+                      <button
+                        onClick={() => {
+                          setEditingCustomSection(customSection.id);
+                          setEditingId(item.id);
+                        }}
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <Edit2 className="w-4 h-4 text-primary" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setData((prev) => ({
+                            ...prev,
+                            customSections: prev.customSections.map((cs) =>
+                              cs.id === customSection.id
+                                ? {
+                                    ...cs,
+                                    items: cs.items.filter(
+                                      (i) => i.id !== item.id
+                                    ),
+                                  }
+                                : cs
+                            ),
+                          }));
+                        }}
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </div>
+                    {editingCustomSection === customSection.id &&
+                    editingId === item.id ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={item.title}
+                          onChange={(e) => {
+                            setData((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((cs) =>
+                                cs.id === customSection.id
+                                  ? {
+                                      ...cs,
+                                      items: cs.items.map((i) =>
+                                        i.id === item.id
+                                          ? { ...i, title: e.target.value }
+                                          : i
+                                      ),
+                                    }
+                                  : cs
+                              ),
+                            }));
+                          }}
+                          className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                          placeholder="Title"
+                        />
+                        <textarea
+                          value={item.content}
+                          onChange={(e) => {
+                            setData((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((cs) =>
+                                cs.id === customSection.id
+                                  ? {
+                                      ...cs,
+                                      items: cs.items.map((i) =>
+                                        i.id === item.id
+                                          ? { ...i, content: e.target.value }
+                                          : i
+                                      ),
+                                    }
+                                  : cs
+                              ),
+                            }));
+                          }}
+                          className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                          rows={4}
+                          placeholder="Content"
+                        />
+                        <div className="flex justify-end mt-2 space-x-2">
+                          <button
+                            onClick={() => {
+                              setEditingCustomSection(null);
+                              setEditingId(null);
+                            }}
+                            className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <X className="w-4 h-4 text-red-600" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!item.title.trim()) {
+                                toast.error("Title cannot be empty");
+                                return;
+                              }
+                              if (!item.content.trim()) {
+                                toast.error("Content cannot be empty");
+                                return;
+                              }
+                              setEditingCustomSection(null);
+                              setEditingId(null);
+                            }}
+                            className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <Check className="w-4 h-4 text-green-600" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-bold">{item.title}</div>
+                        <div className="text-sm mt-1">{item.content}</div>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {editingCustomSection === customSection.id &&
+                isAddingCustomItem ? (
+                  <div className="p-2 border-2 border-dashed border-primary rounded-md mb-4">
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        id="new-item-title"
+                        className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="Title"
+                      />
+                      <textarea
+                        id="new-item-content"
+                        className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                        rows={4}
+                        placeholder="Content"
+                      />
+                      <div className="flex justify-end mt-2 space-x-2">
+                        <button
+                          onClick={() => setIsAddingCustomItem(false)}
+                          className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <X className="w-4 h-4 text-red-600" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const titleEl = document.getElementById(
+                              "new-item-title"
+                            ) as HTMLInputElement;
+                            const contentEl = document.getElementById(
+                              "new-item-content"
+                            ) as HTMLTextAreaElement;
+
+                            if (
+                              handleSaveCustomItem(
+                                customSection.id,
+                                titleEl.value,
+                                contentEl.value
+                              )
+                            ) {
+                              titleEl.value = "";
+                              contentEl.value = "";
+                            }
+                          }}
+                          className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <Check className="w-4 h-4 text-green-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleAddCustomItem(customSection.id)}
+                    className="flex items-center gap-2 text-[#26B6A5] hover:text-[#1a8a7c] mb-4"
+                  >
+                    <Plus className="w-4 h-4" /> Add new item
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        );
       default:
         return null;
     }
@@ -1308,13 +1583,38 @@ export default function EditResume() {
 
       {/* Add New Section button */}
       <div className="relative mt-8 pt-6 border-t border-gray-300">
-        <button
-          onClick={handleAddSection}
-          className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 text-primary" />
-          Add New Section
-        </button>
+        {isAddingSection ? (
+          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-2 border border-gray-300 rounded-lg shadow-sm flex items-center gap-2">
+            <input
+              type="text"
+              value={newSectionTitle}
+              onChange={(e) => setNewSectionTitle(e.target.value)}
+              className="p-2 border rounded hover-border transition-colors duration-200"
+              placeholder="Section Title"
+              autoFocus
+            />
+            <button
+              onClick={() => handleSaveNewSection()}
+              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Check className="w-4 h-4 text-green-600" />
+            </button>
+            <button
+              onClick={() => setIsAddingSection(false)}
+              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <X className="w-4 h-4 text-red-600" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleAddSection}
+            className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
+          >
+            <Plus className="w-5 h-5 text-primary" />
+            Add New Section
+          </button>
+        )}
       </div>
     </div>
   );

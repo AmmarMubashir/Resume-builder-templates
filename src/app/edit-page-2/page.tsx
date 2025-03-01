@@ -1,6 +1,6 @@
 import EditLayout from "@/components/edit-layout";
+import ResumeTemplate2 from "@/components/template-2/edit-resume-2";
 
-import ResumeTemplate2 from "@/components/ui/edit-resume-2";
 import React from "react";
 
 const ResumePage = () => {
