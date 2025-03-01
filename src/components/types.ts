@@ -30,3 +30,7 @@ export interface ResumeData {
   certificates: any[];
   custom: any[];
 }
+export interface Link {
+  text: string;
+  url: string;
+}

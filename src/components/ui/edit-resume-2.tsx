@@ -13,6 +13,7 @@ import {
   Phone,
   MapPin,
   Linkedin,
+  ExternalLink,
 } from "lucide-react";
 import type { ResumeData, Section, Link } from "../types";
 import {
@@ -142,7 +143,7 @@ const DragHandle = ({ id }: any) => {
       {...attributes}
       {...listeners}
     >
-      <ArrowUpDown className="w-5 h-5 text-[#26B6A5]" />
+      <ArrowUpDown className="w-5 h-5 text-primary" />
     </div>
   );
 };
@@ -398,14 +399,14 @@ export default function EditResume() {
             onClick={() => handleAdd(section.type)}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
-            <Plus className="w-4 h-4 text-[#26B6A5]" />
+            <Plus className="w-4 h-4 text-primary" />
           </button>
         )}
         <button
           onClick={() => handleEditSectionTitle(section.id)}
           className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
         >
-          <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+          <Edit2 className="w-4 h-4 text-primary" />
         </button>
         <button
           onClick={() => handleSectionVisibility(section.id)}
@@ -464,7 +465,7 @@ export default function EditResume() {
         {link.text && link.url ? (
           <>
             <a href={link.url} className="text-[#26B6A5] hover:underline">
-              {link.text}
+              <ExternalLink className=" w-5 h-5 text-[#26B6A5] hover:underline" />
             </a>
             <button
               onClick={() => handleEditLink(section, id)}
@@ -498,14 +499,14 @@ export default function EditResume() {
             {data.education.map((edu) => (
               <div
                 key={edu.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#26B6A5]"
+                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-primary"
               >
                 <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
                   <button
                     onClick={() => handleEdit("education", edu.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+                    <Edit2 className="w-4 h-4 text-primary" />
                   </button>
                   <button
                     onClick={() => handleDelete("education", edu.id)}
@@ -613,7 +614,9 @@ export default function EditResume() {
                         {edu.startDate} - {edu.endDate}
                       </div>
                     </div>
-                    <div className="text-sm">{edu.degree}</div>
+                    <div className="text-sm">
+                      {edu.degree}- GPA: {edu.gpa}
+                    </div>
                   </>
                 )}
               </div>
@@ -695,7 +698,7 @@ export default function EditResume() {
                       onClick={() => handleEdit("skills")}
                       className="ml-2 p-2 hover:bg-gray-100 rounded opacity-0 group-hover/item:opacity-100"
                     >
-                      <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+                      <Edit2 className="w-4 h-4 text-primary" />
                     </button>
                   </li>
                 ))}
@@ -710,14 +713,14 @@ export default function EditResume() {
             {data[section.type].map((item: any) => (
               <div
                 key={item.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#26B6A5] mb-4"
+                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-primary mb-4"
               >
                 <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
                   <button
                     onClick={() => handleEdit(section.type, item.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+                    <Edit2 className="w-4 h-4 text-primary" />
                   </button>
                   <button
                     onClick={() => handleDelete(section.type, item.id)}
@@ -852,8 +855,8 @@ export default function EditResume() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex justify-between">
-                      <div className="font-bold">
+                    <div className="flex justify-between items-center">
+                      <div className="font-bold flex items-center">
                         {section.type === "experience" ? (
                           <>{item.title}</>
                         ) : (
@@ -861,7 +864,6 @@ export default function EditResume() {
                             {item.title}
                             {item.link.text && (
                               <span className="ml-2 inline-flex items-center">
-                                <LinkIcon className="w-3 h-3 text-[#26B6A5] mr-1" />
                                 {renderLink(item.link, section.type, item.id)}
                               </span>
                             )}
@@ -897,14 +899,14 @@ export default function EditResume() {
             {data.certificates.map((item) => (
               <div
                 key={item.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-[#26B6A5]"
+                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-primary"
               >
                 <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
                   <button
                     onClick={() => handleEdit("certificates", item.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+                    <Edit2 className="w-4 h-4 text-primary" />
                   </button>
                   <button
                     onClick={() => handleDelete("certificates", item.id)}
@@ -1014,7 +1016,7 @@ export default function EditResume() {
                     onClick={() => handleEdit("custom", item.id)}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Edit2 className="w-4 h-4 text-[#26B6A5]" />
+                    <Edit2 className="w-4 h-4 text-primary" />
                   </button>
                   <button
                     onClick={() => handleDelete("custom", item.id)}
@@ -1093,12 +1095,12 @@ export default function EditResume() {
         input:focus,
         textarea:focus {
           outline: none;
-          border-color: #26b6a5;
+          border-color: #356cb5;
           box-shadow: 0 0 0 2px rgba(38, 182, 165, 0.2);
         }
         .hover-border:hover {
-          border-color: #26b6a5;
-          border: 2px solid #26b6a5;
+          border-color: #356cb5;
+          border: 2px solid #356cb5;
         }
       `}</style>
       {/* Personal Info Section */}
@@ -1115,7 +1117,7 @@ export default function EditResume() {
             {editingSection === "personalInfo" ? (
               <Check className="w-5 h-5 text-green-600" />
             ) : (
-              <Edit2 className="w-5 h-5 text-[#26B6A5]" />
+              <Edit2 className="w-5 h-5 text-primary" />
             )}
           </button>
           {editingSection === "personalInfo" && (
@@ -1212,26 +1214,6 @@ export default function EditResume() {
                   </button>
                 </div>
               ))}
-              <button
-                onClick={() => {
-                  const newKey = `link${
-                    Object.keys(data.personalInfo.links).length + 1
-                  }`;
-                  setData((prev) => ({
-                    ...prev,
-                    personalInfo: {
-                      ...prev.personalInfo,
-                      links: {
-                        ...prev.personalInfo.links,
-                        [newKey]: { text: "", url: "" },
-                      },
-                    },
-                  }));
-                }}
-                className="flex items-center gap-2 text-[#26B6A5] hover:text-[#1a8a7c]"
-              >
-                <Plus className="w-5 h-5" /> Add new link
-              </button>
             </div>
           </div>
         ) : (
@@ -1314,7 +1296,7 @@ export default function EditResume() {
         </SortableContext>
         <DragOverlay>
           {activeId ? (
-            <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-[#26B6A5]">
+            <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-primary">
               {data.sections.find((section) => section.id === activeId)?.title}
             </div>
           ) : null}
@@ -1325,9 +1307,9 @@ export default function EditResume() {
       <div className="relative mt-8 pt-6 border-t border-gray-300">
         <button
           onClick={handleAddSection}
-          className="absolute left-1/2 top-0 text-[#26B6A5] transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
+          className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
         >
-          <Plus className="w-5 h-5 text-[#26B6A5]" />
+          <Plus className="w-5 h-5 text-primary" />
           Add New Section
         </button>
       </div>
