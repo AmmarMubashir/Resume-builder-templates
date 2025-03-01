@@ -1172,7 +1172,7 @@ export default function EditResume() {
                 {Object.entries(data.skills).map(([category, skills]) => (
                   <li
                     key={category}
-                    className="group/item relative hover-border-resume"
+                    className="group/item relative hover-border-resume pl-1"
                   >
                     <span className="font-bold capitalize">{category}:</span>{" "}
                     {skills.join(", ")}

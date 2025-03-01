@@ -35,6 +35,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useResumeContext } from "@/context/ResumeContext";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/utils";
 
 const initialSections: Section[] = [
   { id: "1", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
@@ -87,6 +88,8 @@ const initialData: ResumeData = {
       company: "TechSolve Solutions",
       link: { text: "", url: "" },
       duration: "July 2024 - Dec 2024",
+      startDate: "03/03/2025",
+      endDate: "03/03/2026",
       points: [
         "Developed a responsive web application using React.js and TailwindCSS, improving user engagement by 15%.",
         "Collaborated with a team of 4 to implement a RESTful API using Node.js and Express, ensuring seamless data flow between the frontend and backend.",
@@ -103,6 +106,8 @@ const initialData: ResumeData = {
       title: "TaskManager Pro",
       link: { text: "", url: "" },
       duration: "2019 - 2020",
+      startDate: "03/03/2025",
+      endDate: "03/03/2026",
       points: [
         "Developed TaskManager Pro, a task management web application to streamline daily task organization and communication.",
         "Implemented user authentication (signup, login, and password recovery) with secure JWT-based access, ensuring data protection for 1,000+ users.",
@@ -117,6 +122,8 @@ const initialData: ResumeData = {
       title: "Portfolio Builder",
       link: { text: "", url: "" },
       duration: "2020 - 2021",
+      startDate: "03/03/2025",
+      endDate: "03/03/2026",
       points: [
         "Developed a dynamic web application enabling users to create and customize professional portfolios with real-time previews.",
         "Integrated drag-and-drop features using React.js, enhancing user experience and reducing portfolio creation time by 40%.",
@@ -129,7 +136,7 @@ const initialData: ResumeData = {
       id: "1",
       name: "AIR 756 in JEE Advance 2019",
       link: { text: "", url: "" },
-      date: "",
+      date: "03/01/2025",
       description: "",
     },
   ],
@@ -186,7 +193,7 @@ export default function EditResume() {
 
   const { setResumeData } = useResumeContext();
 
-  setResumeData(data);
+  // setResumeData(data);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -282,6 +289,8 @@ export default function EditResume() {
           company: "",
           link: { text: "", url: "" },
           duration: "",
+          startDate: "",
+          endDate: "",
           points: [""],
         };
         break;
@@ -291,6 +300,8 @@ export default function EditResume() {
           title: "",
           link: { text: "", url: "" },
           duration: "",
+          startDate: "",
+          endDate: "",
           points: [""],
         };
         break;
@@ -648,7 +659,7 @@ export default function EditResume() {
                     </div>
                     <div className="flex gap-4">
                       <input
-                        type="text"
+                        type="date"
                         value={edu.startDate}
                         onChange={(e) => {
                           const newEducation = data.education.map((item) =>
@@ -662,7 +673,7 @@ export default function EditResume() {
                         placeholder="Start Date"
                       />
                       <input
-                        type="text"
+                        type="date"
                         value={edu.endDate}
                         onChange={(e) => {
                           const newEducation = data.education.map((item) =>
@@ -695,12 +706,16 @@ export default function EditResume() {
                   <>
                     <div className="flex justify-between">
                       <div className="font-bold">{edu.institution}</div>
-                      <div className="text-right">
-                        {edu.startDate} - {edu.endDate}
-                      </div>
+                      {edu.startDate && (
+                        <div className="text-right">
+                          {formatDate(edu.startDate)} -{" "}
+                          {formatDate(edu.endDate)}
+                        </div>
+                      )}
                     </div>
                     <div className="text-sm">
-                      {edu.degree}- GPA: {edu.gpa}
+                      {edu.degree && <span>{edu.degree}</span>}{" "}
+                      {edu.gpa && <span>- GPA: {edu.gpa}</span>}
                     </div>
                   </>
                 )}
@@ -772,13 +787,14 @@ export default function EditResume() {
                 </div>
               </div>
             ) : (
-              <ul className="list-none space-y-1">
+              <ul className="list-disc ml-5 space-y-1">
                 {Object.entries(data.skills).map(([category, skills]) => (
                   <li
                     key={category}
-                    className="group/item relative hover-border-resume"
+                    className="group/item relative hover-border-resume pl-1"
                   >
-                    {Array.isArray(skills) ? skills.join(", ") : skills}
+                    <span className="font-bold capitalize">{category}:</span>{" "}
+                    {skills.join(", ")}
                     <button
                       onClick={() => handleEdit("skills")}
                       className="ml-2 p-2 hover:bg-gray-100 rounded opacity-0 group-hover/item:opacity-100"
@@ -821,27 +837,28 @@ export default function EditResume() {
                     data-id={item.id}
                   >
                     <div className="flex gap-4">
-                      <input
-                        type="text"
-                        value={item.title || item.name}
-                        onChange={(e) => {
-                          const newData = (
-                            data[section.type as keyof ResumeData] as any[]
-                          ).map((dataItem: any) =>
-                            dataItem.id === item.id
-                              ? {
-                                  ...dataItem,
-                                  [item.title ? "title" : "name"]:
-                                    e.target.value,
-                                }
-                              : dataItem
-                          );
-                          handleSave(section.type, newData);
-                        }}
-                        className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
-                        placeholder={item.title ? "Title" : "Name"}
-                      />
-                      {item.company && (
+                      {
+                        <input
+                          type="text"
+                          value={item.title}
+                          onChange={(e) => {
+                            const newData = (
+                              data[section.type as keyof ResumeData] as any[]
+                            ).map((dataItem: any) =>
+                              dataItem.id === item.id
+                                ? {
+                                    ...dataItem,
+                                    title: e.target.value,
+                                  }
+                                : dataItem
+                            );
+                            handleSave(section.type, newData);
+                          }}
+                          className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                          placeholder={"Title"}
+                        />
+                      }
+                      {section.type === "experience" && (
                         <input
                           type="text"
                           value={item.company}
@@ -859,28 +876,44 @@ export default function EditResume() {
                           placeholder="Company"
                         />
                       )}
-                      {item.duration && (
-                        <input
-                          type="text"
-                          value={item.duration}
-                          onChange={(e) => {
-                            const newData = (
-                              data[section.type as keyof ResumeData] as any[]
-                            ).map((dataItem: any) =>
-                              dataItem.id === item.id
-                                ? { ...dataItem, duration: e.target.value }
-                                : dataItem
-                            );
-                            handleSave(section.type, newData);
-                          }}
-                          className="w-32 p-2 border rounded hover-border transition-colors duration-200"
-                          placeholder="Duration"
-                        />
-                      )}
                     </div>
                     <div className="flex gap-2 items-center">
                       <span className="text-sm font-medium">Link:</span>
                       {renderLink(item.link, section.type, item.id)}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-1">
+                      <input
+                        type="date"
+                        value={item.startDate}
+                        onChange={(e) => {
+                          const newData = (
+                            data[section.type as keyof ResumeData] as any[]
+                          ).map((dataItem: any) =>
+                            dataItem.id === item.id
+                              ? { ...dataItem, startDate: e.target.value }
+                              : dataItem
+                          );
+                          handleSave(section.type, newData);
+                        }}
+                        className="w-full sm:w-1/2 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="StartDate"
+                      />
+                      <input
+                        type="date"
+                        value={item.endDate}
+                        onChange={(e) => {
+                          const newData = (
+                            data[section.type as keyof ResumeData] as any[]
+                          ).map((dataItem: any) =>
+                            dataItem.id === item.id
+                              ? { ...dataItem, endDate: e.target.value }
+                              : dataItem
+                          );
+                          handleSave(section.type, newData);
+                        }}
+                        className="w-full sm:w-1/2 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="EndDate"
+                      />
                     </div>
                     {item.points && (
                       <textarea
@@ -892,9 +925,7 @@ export default function EditResume() {
                             dataItem.id === item.id
                               ? {
                                   ...dataItem,
-                                  points: e.target.value
-                                    .split("\n")
-                                    .filter(Boolean),
+                                  points: e.target.value.split("\n"), // Keep empty lines
                                 }
                               : dataItem
                           );
@@ -955,7 +986,10 @@ export default function EditResume() {
                           </>
                         )}
                       </div>
-                      <div className="text-right">{item.duration}</div>
+                      <div className="text-right">
+                        {formatDate(item.startDate)} -{" "}
+                        {formatDate(item.endDate)}
+                      </div>
                     </div>
                     {section.type === "experience" && (
                       <div className="text-sm">{item.company}</div>
@@ -1022,7 +1056,7 @@ export default function EditResume() {
                         placeholder="Certificate Name"
                       />
                       <input
-                        type="text"
+                        type="date"
                         value={item.date}
                         onChange={(e) => {
                           const newData = data.certificates.map((cert) =>
@@ -1080,7 +1114,7 @@ export default function EditResume() {
                           </span>
                         )}
                       </div>
-                      <div>{item.date}</div>
+                      <div>{formatDate(item.date)}</div>
                     </div>
                     {item.description && (
                       <div className="text-sm mt-1">{item.description}</div>
