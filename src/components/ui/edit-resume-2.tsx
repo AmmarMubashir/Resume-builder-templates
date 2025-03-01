@@ -33,6 +33,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useResumeContext } from "@/context/ResumeContext";
 
 const initialSections: Section[] = [
   { id: "1", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
@@ -174,6 +175,8 @@ export default function EditResume() {
     id: string;
   } | null>(null);
 
+  const { setResumeData } = useResumeContext();
+  setResumeData(data);
   const [activeId, setActiveId] = useState(null);
 
   const sensors = useSensors(

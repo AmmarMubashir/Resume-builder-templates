@@ -1,5 +1,4 @@
 "use client";
-import ResumePreview from "@/components/ResumePreview";
 import { useResumeContext } from "@/context/ResumeContext";
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -8,7 +7,7 @@ import { Download, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ResumePreview2 from "@/components/ResumePreview2";
 
-const Preview = () => {
+const Preview2 = () => {
   const { resumeData } = useResumeContext();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -36,11 +35,11 @@ const Preview = () => {
       </div>
       <div className="md:w-1/2 mx-auto">
         {}
-        <ResumePreview contentRef={contentRef} resumeData={resumeData} />
-        {/* <ResumePreview2 contentRef={contentRef} resumeData={resumeData} /> */}
+        {/* <ResumePreview contentRef={contentRef} resumeData={resumeData} /> */}
+        <ResumePreview2 contentRef={contentRef} resumeData={resumeData} />
       </div>
     </div>
   );
 };
 
-export default Preview;
+export default Preview2;

@@ -29,7 +29,7 @@ const EditLayout = () => {
           className="bg-primary text-white h-[50]  flex items-center justify-center"
           asChild
         >
-          <Link href="/preview">
+          <Link href="/preview2">
             <Play className="w-5 h-5  text-white" />
             <span className="text-white font-normal">Preview</span>
           </Link>
