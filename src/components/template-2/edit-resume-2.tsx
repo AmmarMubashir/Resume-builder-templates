@@ -15,7 +15,7 @@ import {
   Linkedin,
   ExternalLink,
 } from "lucide-react";
-import type { ResumeData, Section, Link } from "../types";
+import type { ResumeData, Section, Link } from "./types";
 import {
   DndContext,
   closestCenter,
@@ -34,6 +34,16 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useResumeContext } from "@/context/ResumeContext";
+import { toast } from "sonner";
+import { formatDate } from "@/lib/utils";
+
+const validatePersonalInfo = (personalInfo: any): boolean => {
+  if (!personalInfo.name.trim()) {
+    toast.error("Name cannot be empty");
+    return false;
+  }
+  return true;
+};
 
 const initialSections: Section[] = [
   { id: "1", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
@@ -42,6 +52,8 @@ const initialSections: Section[] = [
   { id: "4", title: "SKILLS", isVisible: true, type: "skills" },
   { id: "5", title: "Achievement", isVisible: true, type: "certificates" },
 ];
+
+const MAX_CONTENT_LENGTH = 500; // Maximum character length for content fields
 
 const initialData: ResumeData = {
   personalInfo: {
@@ -86,6 +98,8 @@ const initialData: ResumeData = {
       company: "TechSolve Solutions",
       link: { text: "", url: "" },
       duration: "July 2024 - Dec 2024",
+      startDate: "03/03/2025",
+      endDate: "03/03/2026",
       points: [
         "Developed a responsive web application using React.js and TailwindCSS, improving user engagement by 15%.",
         "Collaborated with a team of 4 to implement a RESTful API using Node.js and Express, ensuring seamless data flow between the frontend and backend.",
@@ -102,6 +116,8 @@ const initialData: ResumeData = {
       title: "TaskManager Pro",
       link: { text: "", url: "" },
       duration: "2019 - 2020",
+      startDate: "03/03/2025",
+      endDate: "03/03/2026",
       points: [
         "Developed TaskManager Pro, a task management web application to streamline daily task organization and communication.",
         "Implemented user authentication (signup, login, and password recovery) with secure JWT-based access, ensuring data protection for 1,000+ users.",
@@ -116,6 +132,8 @@ const initialData: ResumeData = {
       title: "Portfolio Builder",
       link: { text: "", url: "" },
       duration: "2020 - 2021",
+      startDate: "03/03/2025",
+      endDate: "03/03/2026",
       points: [
         "Developed a dynamic web application enabling users to create and customize professional portfolios with real-time previews.",
         "Integrated drag-and-drop features using React.js, enhancing user experience and reducing portfolio creation time by 40%.",
@@ -128,11 +146,12 @@ const initialData: ResumeData = {
       id: "1",
       name: "AIR 756 in JEE Advance 2019",
       link: { text: "", url: "" },
-      date: "",
+      date: "03/01/2025",
       description: "",
     },
   ],
   custom: [],
+  customSections: [],
 };
 
 const DragHandle = ({ id }: any) => {
@@ -174,10 +193,17 @@ export default function EditResume() {
     section: string;
     id: string;
   } | null>(null);
+  const [isAddingSection, setIsAddingSection] = useState(false);
+  const [newSectionTitle, setNewSectionTitle] = useState("");
+  const [editingCustomSection, setEditingCustomSection] = useState<
+    string | null
+  >(null);
+  const [isAddingCustomItem, setIsAddingCustomItem] = useState(false);
+  const [activeId, setActiveId] = useState(null);
 
   const { setResumeData } = useResumeContext();
-  setResumeData(data);
-  const [activeId, setActiveId] = useState(null);
+
+  // setResumeData(data);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -273,6 +299,8 @@ export default function EditResume() {
           company: "",
           link: { text: "", url: "" },
           duration: "",
+          startDate: "",
+          endDate: "",
           points: [""],
         };
         break;
@@ -282,6 +310,8 @@ export default function EditResume() {
           title: "",
           link: { text: "", url: "" },
           duration: "",
+          startDate: "",
+          endDate: "",
           points: [""],
         };
         break;
@@ -347,26 +377,140 @@ export default function EditResume() {
   };
 
   const handleAddSection = () => {
+    setIsAddingSection(true);
+    setNewSectionTitle("");
+  };
+
+  const handleSaveNewSection = () => {
+    if (!newSectionTitle.trim()) {
+      toast.error("Section title cannot be empty");
+      return;
+    }
+
+    if (newSectionTitle.length > 50) {
+      toast.error("Section title is too long (maximum 50 characters)");
+      return;
+    }
+
     const newId = Math.random().toString(36).substr(2, 9);
     const newSection: Section = {
       id: newId,
-      title: "New Section",
+      title: newSectionTitle,
       isVisible: true,
-      type: "custom",
+      type: "customSection",
     };
+
     setData((prev) => ({
       ...prev,
       sections: [...prev.sections, newSection],
-      custom: [
-        ...prev.custom,
-        { id: newId, title: "New Section", content: "" },
+      customSections: [
+        ...prev.customSections,
+        {
+          id: newId,
+          sectionTitle: newSectionTitle,
+          items: [],
+        },
       ],
     }));
-    setEditingSection("custom");
-    setEditingId(newId);
+
+    setNewSectionTitle("");
+    setIsAddingSection(false);
+    setEditingCustomSection(newId);
   };
 
-  // Update the renderSectionTitle function
+  const handleAddCustomItem = (sectionId: string) => {
+    if (!editingCustomSection) {
+      setEditingCustomSection(sectionId);
+    }
+
+    setIsAddingCustomItem(true);
+  };
+
+  const handleSaveCustomItem = (
+    sectionId: string,
+    title: string,
+    content: string
+  ) => {
+    if (!title.trim()) {
+      toast.error("Title cannot be empty");
+      return false;
+    }
+
+    if (!content.trim()) {
+      toast.error("Content cannot be empty");
+      return false;
+    }
+
+    if (content.length > MAX_CONTENT_LENGTH) {
+      toast.error(
+        `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`
+      );
+      return false;
+    }
+
+    const newItemId = Math.random().toString(36).substr(2, 9);
+
+    setData((prev) => ({
+      ...prev,
+      customSections: prev.customSections.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              items: [
+                ...section.items,
+                {
+                  id: newItemId,
+                  title,
+                  content,
+                },
+              ],
+            }
+          : section
+      ),
+    }));
+
+    setIsAddingCustomItem(false);
+    return true;
+  };
+
+  const handleCloseEdit = () => {
+    // Validate fields based on the current editing section
+    if (editingSection === "education" && editingId) {
+      const edu = data.education.find((item) => item.id === editingId);
+      if (edu && !edu.institution.trim()) {
+        toast.error("Institution name cannot be empty");
+        return;
+      }
+    } else if (editingSection === "experience" && editingId) {
+      const exp = data.experience.find((item) => item.id === editingId);
+      if (exp) {
+        if (!exp.title.trim()) {
+          toast.error("Title cannot be empty");
+          return;
+        }
+        if (!exp.company.trim()) {
+          toast.error("Company name cannot be empty");
+          return;
+        }
+      }
+    } else if (editingSection === "projects" && editingId) {
+      const proj = data.projects.find((item) => item.id === editingId);
+      if (proj && !proj.title.trim()) {
+        toast.error("Project title cannot be empty");
+        return;
+      }
+    } else if (editingSection === "certificates" && editingId) {
+      const cert = data.certificates.find((item) => item.id === editingId);
+      if (cert && !cert.name.trim()) {
+        toast.error("Certificate name cannot be empty");
+        return;
+      }
+    }
+
+    setEditingSection(null);
+    setEditingId(null);
+  };
+
   const renderSectionTitle = (section: Section) => (
     <div className="flex justify-between items-center mb-4 group relative">
       <DragHandle id={section.id} />
@@ -385,10 +529,21 @@ export default function EditResume() {
                   ),
                 }));
               }}
-              onBlur={() => setEditingTitle(null)}
               className="w-full p-2 border rounded hover-border transition-colors duration-200 text-center font-bold text-lg"
               autoFocus
             />
+            <button
+              onClick={() => {
+                if (!section.title.trim()) {
+                  toast.error("Section title cannot be empty");
+                  return;
+                }
+                setEditingTitle(null);
+              }}
+              className="p-2 mr-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Check className="w-4 h-4 text-green-600" />
+            </button>
           </div>
         ) : (
           <h2 className="text-lg font-bold text-[#26B6A5] uppercase border-b-2 border-[#26B6A5] pb-1 inline-block">
@@ -397,13 +552,22 @@ export default function EditResume() {
         )}
       </div>
       <div className="hidden group-hover:flex gap-2">
-        {section.type !== "skills" && (
+        {section.type === "customSection" ? (
           <button
-            onClick={() => handleAdd(section.type)}
+            onClick={() => handleAddCustomItem(section.id)}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
             <Plus className="w-4 h-4 text-primary" />
           </button>
+        ) : (
+          section.type !== "skills" && (
+            <button
+              onClick={() => handleAdd(section.type)}
+              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Plus className="w-4 h-4 text-primary" />
+            </button>
+          )
         )}
         <button
           onClick={() => handleEditSectionTitle(section.id)}
@@ -489,11 +653,6 @@ export default function EditResume() {
     );
   };
 
-  const handleCloseEdit = () => {
-    setEditingSection(null);
-    setEditingId(null);
-  };
-
   const renderSection = (section: Section) => {
     switch (section.type) {
       case "education":
@@ -566,7 +725,7 @@ export default function EditResume() {
                     </div>
                     <div className="flex gap-4">
                       <input
-                        type="text"
+                        type="date"
                         value={edu.startDate}
                         onChange={(e) => {
                           const newEducation = data.education.map((item) =>
@@ -580,7 +739,7 @@ export default function EditResume() {
                         placeholder="Start Date"
                       />
                       <input
-                        type="text"
+                        type="date"
                         value={edu.endDate}
                         onChange={(e) => {
                           const newEducation = data.education.map((item) =>
@@ -599,12 +758,6 @@ export default function EditResume() {
                         onClick={() => handleCloseEdit()}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
                         <Check className="w-4 h-4 text-green-600" />
                       </button>
                     </div>
@@ -613,12 +766,16 @@ export default function EditResume() {
                   <>
                     <div className="flex justify-between">
                       <div className="font-bold">{edu.institution}</div>
-                      <div className="text-right">
-                        {edu.startDate} - {edu.endDate}
-                      </div>
+                      {edu.startDate && (
+                        <div className="text-right">
+                          {formatDate(edu.startDate)} -{" "}
+                          {formatDate(edu.endDate)}
+                        </div>
+                      )}
                     </div>
                     <div className="text-sm">
-                      {edu.degree}- GPA: {edu.gpa}
+                      {edu.degree && <span>{edu.degree}</span>}{" "}
+                      {edu.gpa && <span>- GPA: {edu.gpa}</span>}
                     </div>
                   </>
                 )}
@@ -679,24 +836,19 @@ export default function EditResume() {
                     onClick={() => handleCloseEdit()}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <X className="w-4 h-4 text-red-600" />
-                  </button>
-                  <button
-                    onClick={() => handleCloseEdit()}
-                    className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                  >
                     <Check className="w-4 h-4 text-green-600" />
                   </button>
                 </div>
               </div>
             ) : (
-              <ul className="list-none space-y-1">
+              <ul className="list-disc ml-5 space-y-1">
                 {Object.entries(data.skills).map(([category, skills]) => (
                   <li
                     key={category}
-                    className="group/item relative hover-border-resume"
+                    className="group/item relative hover-border-resume pl-1"
                   >
-                    {Array.isArray(skills) ? skills.join(", ") : skills}
+                    <span className="font-bold capitalize">{category}:</span>{" "}
+                    {skills.join(", ")}
                     <button
                       onClick={() => handleEdit("skills")}
                       className="ml-2 p-2 hover:bg-gray-100 rounded opacity-0 group-hover/item:opacity-100"
@@ -741,7 +893,7 @@ export default function EditResume() {
                     <div className="flex gap-4">
                       <input
                         type="text"
-                        value={item.title || item.name}
+                        value={item.title}
                         onChange={(e) => {
                           const newData = (
                             data[section.type as keyof ResumeData] as any[]
@@ -749,17 +901,16 @@ export default function EditResume() {
                             dataItem.id === item.id
                               ? {
                                   ...dataItem,
-                                  [item.title ? "title" : "name"]:
-                                    e.target.value,
+                                  title: e.target.value,
                                 }
                               : dataItem
                           );
                           handleSave(section.type, newData);
                         }}
                         className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
-                        placeholder={item.title ? "Title" : "Name"}
+                        placeholder={"Title"}
                       />
-                      {item.company && (
+                      {section.type === "experience" && (
                         <input
                           type="text"
                           value={item.company}
@@ -777,42 +928,69 @@ export default function EditResume() {
                           placeholder="Company"
                         />
                       )}
-                      {item.duration && (
-                        <input
-                          type="text"
-                          value={item.duration}
-                          onChange={(e) => {
-                            const newData = (
-                              data[section.type as keyof ResumeData] as any[]
-                            ).map((dataItem: any) =>
-                              dataItem.id === item.id
-                                ? { ...dataItem, duration: e.target.value }
-                                : dataItem
-                            );
-                            handleSave(section.type, newData);
-                          }}
-                          className="w-32 p-2 border rounded hover-border transition-colors duration-200"
-                          placeholder="Duration"
-                        />
-                      )}
                     </div>
                     <div className="flex gap-2 items-center">
                       <span className="text-sm font-medium">Link:</span>
                       {renderLink(item.link, section.type, item.id)}
                     </div>
+                    <div className="flex flex-col sm:flex-row gap-1">
+                      <input
+                        type="date"
+                        value={item.startDate}
+                        onChange={(e) => {
+                          const newData = (
+                            data[section.type as keyof ResumeData] as any[]
+                          ).map((dataItem: any) =>
+                            dataItem.id === item.id
+                              ? { ...dataItem, startDate: e.target.value }
+                              : dataItem
+                          );
+                          handleSave(section.type, newData);
+                        }}
+                        className="w-full sm:w-1/2 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="StartDate"
+                      />
+                      <input
+                        type="date"
+                        value={item.endDate}
+                        onChange={(e) => {
+                          const newData = (
+                            data[section.type as keyof ResumeData] as any[]
+                          ).map((dataItem: any) =>
+                            dataItem.id === item.id
+                              ? { ...dataItem, endDate: e.target.value }
+                              : dataItem
+                          );
+                          handleSave(section.type, newData);
+                        }}
+                        className="w-full sm:w-1/2 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="EndDate"
+                      />
+                    </div>
                     {item.points && (
                       <textarea
                         value={item.points.join("\n")}
                         onChange={(e) => {
+                          const points = e.target.value.split("\n");
+
+                          // Check if any point exceeds the maximum length
+                          const exceedsMaxLength = points.some(
+                            (point) => point.length > MAX_CONTENT_LENGTH
+                          );
+                          if (exceedsMaxLength) {
+                            toast.error(
+                              `One or more points exceed maximum length of ${MAX_CONTENT_LENGTH} characters`
+                            );
+                            return;
+                          }
+
                           const newData = (
                             data[section.type as keyof ResumeData] as any[]
                           ).map((dataItem: any) =>
                             dataItem.id === item.id
                               ? {
                                   ...dataItem,
-                                  points: e.target.value
-                                    .split("\n")
-                                    .filter(Boolean),
+                                  points: points, // Keep empty lines
                                 }
                               : dataItem
                           );
@@ -823,33 +1001,39 @@ export default function EditResume() {
                         placeholder="Enter points (one per line)"
                       />
                     )}
-                    {item.description && (
-                      <textarea
-                        value={item.description}
-                        onChange={(e) => {
-                          const newData = (
-                            data[section.type as keyof ResumeData] as any[]
-                          ).map((dataItem: any) =>
-                            dataItem.id === item.id
-                              ? { ...dataItem, description: e.target.value }
-                              : dataItem
-                          );
-                          handleSave(section.type, newData);
-                        }}
-                        className="w-full p-2 border rounded hover-border transition-colors duration-200"
-                        rows={4}
-                        placeholder="Description"
-                      />
-                    )}
                     <div className="flex justify-end mt-2 space-x-2">
                       <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
+                        onClick={() => {
+                          // Validate required fields
+                          if (section.type === "experience") {
+                            if (!item.title.trim()) {
+                              toast.error("Title cannot be empty");
+                              return;
+                            }
+                            if (!item.company.trim()) {
+                              toast.error("Company cannot be empty");
+                              return;
+                            }
+                          } else if (section.type === "projects") {
+                            if (!item.title.trim()) {
+                              toast.error("Project title cannot be empty");
+                              return;
+                            }
+                          }
+
+                          // Validate points
+                          if (item.points && item.points.length > 0) {
+                            const emptyPoints = item.points.every(
+                              (point: any) => !point.trim()
+                            );
+                            if (emptyPoints) {
+                              toast.error("Please add at least one point");
+                              return;
+                            }
+                          }
+
+                          handleCloseEdit();
+                        }}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
                         <Check className="w-4 h-4 text-green-600" />
@@ -873,7 +1057,10 @@ export default function EditResume() {
                           </>
                         )}
                       </div>
-                      <div className="text-right">{item.duration}</div>
+                      <div className="text-right">
+                        {formatDate(item.startDate)} -{" "}
+                        {formatDate(item.endDate)}
+                      </div>
                     </div>
                     {section.type === "experience" && (
                       <div className="text-sm">{item.company}</div>
@@ -940,7 +1127,7 @@ export default function EditResume() {
                         placeholder="Certificate Name"
                       />
                       <input
-                        type="text"
+                        type="date"
                         value={item.date}
                         onChange={(e) => {
                           const newData = data.certificates.map((cert) =>
@@ -977,12 +1164,6 @@ export default function EditResume() {
                         onClick={() => handleCloseEdit()}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
                         <Check className="w-4 h-4 text-green-600" />
                       </button>
                     </div>
@@ -998,7 +1179,7 @@ export default function EditResume() {
                           </span>
                         )}
                       </div>
-                      <div>{item.date}</div>
+                      <div>{formatDate(item.date)}</div>
                     </div>
                     {item.description && (
                       <div className="text-sm mt-1">{item.description}</div>
@@ -1067,12 +1248,6 @@ export default function EditResume() {
                         onClick={() => handleCloseEdit()}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
                         <Check className="w-4 h-4 text-green-600" />
                       </button>
                     </div>
@@ -1085,6 +1260,196 @@ export default function EditResume() {
                 )}
               </div>
             ))}
+          </div>
+        );
+      case "customSection":
+        const customSection = data.customSections.find(
+          (cs) => cs.id === section.id
+        );
+        return (
+          <div className="group relative mb-6">
+            {customSection && (
+              <>
+                {customSection.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent hover:border-primary mb-4"
+                  >
+                    <div className="absolute hidden group-hover/item:flex gap-2 -right-4 top-0">
+                      <button
+                        onClick={() => {
+                          setEditingCustomSection(customSection.id);
+                          setEditingId(item.id);
+                        }}
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <Edit2 className="w-4 h-4 text-primary" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setData((prev) => ({
+                            ...prev,
+                            customSections: prev.customSections.map((cs) =>
+                              cs.id === customSection.id
+                                ? {
+                                    ...cs,
+                                    items: cs.items.filter(
+                                      (i) => i.id !== item.id
+                                    ),
+                                  }
+                                : cs
+                            ),
+                          }));
+                        }}
+                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </div>
+                    {editingCustomSection === customSection.id &&
+                    editingId === item.id ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={item.title}
+                          onChange={(e) => {
+                            setData((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((cs) =>
+                                cs.id === customSection.id
+                                  ? {
+                                      ...cs,
+                                      items: cs.items.map((i) =>
+                                        i.id === item.id
+                                          ? { ...i, title: e.target.value }
+                                          : i
+                                      ),
+                                    }
+                                  : cs
+                              ),
+                            }));
+                          }}
+                          className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                          placeholder="Title"
+                        />
+                        <textarea
+                          value={item.content}
+                          onChange={(e) => {
+                            setData((prev) => ({
+                              ...prev,
+                              customSections: prev.customSections.map((cs) =>
+                                cs.id === customSection.id
+                                  ? {
+                                      ...cs,
+                                      items: cs.items.map((i) =>
+                                        i.id === item.id
+                                          ? { ...i, content: e.target.value }
+                                          : i
+                                      ),
+                                    }
+                                  : cs
+                              ),
+                            }));
+                          }}
+                          className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                          rows={4}
+                          placeholder="Content"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>
+                            {item.content.length} / {MAX_CONTENT_LENGTH}{" "}
+                            characters
+                          </span>
+                        </div>
+                        <div className="flex justify-end mt-2 space-x-2">
+                          <button
+                            onClick={() => {
+                              if (!item.title.trim()) {
+                                toast.error("Title cannot be empty");
+                                return;
+                              }
+                              if (!item.content.trim()) {
+                                toast.error("Content cannot be empty");
+                                return;
+                              }
+                              if (item.content.length > MAX_CONTENT_LENGTH) {
+                                toast.error(
+                                  `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`
+                                );
+                                return;
+                              }
+                              setEditingCustomSection(null);
+                              setEditingId(null);
+                            }}
+                            className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <Check className="w-4 h-4 text-green-600" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-bold">{item.title}</div>
+                        <div className="text-sm mt-1">{item.content}</div>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {editingCustomSection === customSection.id &&
+                isAddingCustomItem ? (
+                  <div className="p-2 border-2 border-dashed border-primary rounded-md mb-4">
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        id="new-item-title"
+                        className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder="Title"
+                      />
+                      <textarea
+                        id="new-item-content"
+                        className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                        rows={4}
+                        placeholder="Content"
+                      />
+                      <div className="flex justify-end mt-2 space-x-2">
+                        <button
+                          onClick={() => {
+                            const titleEl = document.getElementById(
+                              "new-item-title"
+                            ) as HTMLInputElement;
+                            const contentEl = document.getElementById(
+                              "new-item-content"
+                            ) as HTMLTextAreaElement;
+
+                            if (
+                              handleSaveCustomItem(
+                                customSection.id,
+                                titleEl.value,
+                                contentEl.value
+                              )
+                            ) {
+                              titleEl.value = "";
+                              contentEl.value = "";
+                            }
+                          }}
+                          className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <Check className="w-4 h-4 text-green-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleAddCustomItem(customSection.id)}
+                    className="flex items-center gap-2 text-[#26B6A5] hover:text-[#1a8a7c] mb-4"
+                  >
+                    <Plus className="w-4 h-4" /> Add new item
+                  </button>
+                )}
+              </>
+            )}
           </div>
         );
       default:
@@ -1110,11 +1475,19 @@ export default function EditResume() {
       <div className="group relative mb-8">
         <div className="absolute hidden group-hover:flex gap-2 -right-4 -top-2">
           <button
-            onClick={() =>
+            onClick={() => {
+              if (editingSection === "personalInfo") {
+                if (validatePersonalInfo(data.personalInfo)) {
+                  toast.success("Changes saved successfully");
+                } else {
+                  toast.error("Title cannot be empty");
+                  return;
+                }
+              }
               setEditingSection(
                 editingSection === "personalInfo" ? null : "personalInfo"
-              )
-            }
+              );
+            }}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
             {editingSection === "personalInfo" ? (
@@ -1123,14 +1496,6 @@ export default function EditResume() {
               <Edit2 className="w-5 h-5 text-primary" />
             )}
           </button>
-          {editingSection === "personalInfo" && (
-            <button
-              onClick={() => setEditingSection(null)}
-              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-            >
-              <X className="w-5 h-5 text-red-600" />
-            </button>
-          )}
         </div>
         {editingSection === "personalInfo" ? (
           <div className="space-y-4">
@@ -1308,13 +1673,38 @@ export default function EditResume() {
 
       {/* Add New Section button */}
       <div className="relative mt-8 pt-6 border-t border-gray-300">
-        <button
-          onClick={handleAddSection}
-          className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 text-primary" />
-          Add New Section
-        </button>
+        {isAddingSection ? (
+          <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-2 border border-gray-300 rounded-lg shadow-sm flex items-center gap-2">
+            <input
+              type="text"
+              value={newSectionTitle}
+              onChange={(e) => setNewSectionTitle(e.target.value)}
+              className="p-2 border rounded hover-border transition-colors duration-200"
+              placeholder="Section Title"
+              autoFocus
+            />
+            <button
+              onClick={() => handleSaveNewSection()}
+              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Check className="w-4 h-4 text-green-600" />
+            </button>
+            <button
+              onClick={() => setIsAddingSection(false)}
+              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <X className="w-4 h-4 text-red-600" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleAddSection}
+            className="absolute left-1/2 top-0 text-primary transform -translate-x-1/2 -translate-y-1/2 bg-[#E6F7F5] px-4 py-2 flex items-center gap-2 text-sm hover:text-[#1a8a7c] border border-gray-300 rounded-full shadow-sm hover:shadow transition-all duration-200"
+          >
+            <Plus className="w-5 h-5 text-primary" />
+            Add New Section
+          </button>
+        )}
       </div>
     </div>
   );
