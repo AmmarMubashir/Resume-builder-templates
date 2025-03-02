@@ -4,7 +4,10 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
 
-const EditLayout = () => {
+interface editLayoutProps {
+  previewLink: string;
+}
+const EditLayout = ({ previewLink }: editLayoutProps) => {
   return (
     <>
       <nav className="flex items-center justify-between px-2 sm:max-w-7xl sm:px-4 py-4">
@@ -29,7 +32,7 @@ const EditLayout = () => {
           className="bg-primary text-white h-[50]  flex items-center justify-center"
           asChild
         >
-          <Link href="/preview2">
+          <Link href={previewLink}>
             <Play className="w-5 h-5  text-white" />
             <span className="text-white font-normal">Preview</span>
           </Link>

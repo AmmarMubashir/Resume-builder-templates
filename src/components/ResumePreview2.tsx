@@ -26,7 +26,7 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
   // console.log("WIDTH", width || "No width yet");
 
   const renderSectionTitle = (section: Section) => (
-    <div className="flex justify-between items-center  group relative">
+    <div className="flex justify-between items-center group relative">
       <div className="flex-1">
         <h2 className="text-lg font-bold text-[#26B6A5] uppercase border-b-2 border-[#26B6A5] pb-1 inline-block">
           {section.title}
@@ -57,7 +57,7 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
             {resumeData.education.map((edu) => (
               <div
                 key={edu.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent break-inside-avoid"
+                className="group/item relative px-2 pt-1 rounded-md border-2 border-transparent break-inside-avoid"
               >
                 <>
                   <div className="flex justify-between">
@@ -93,7 +93,7 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
             {resumeData[section.type].map((item: any) => (
               <div
                 key={item.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent   break-inside-avoid"
+                className="group/item relative px-2 pt-1 rounded-md  border-transparent break-inside-avoid"
               >
                 <>
                   <div className="flex justify-between items-center">
@@ -117,7 +117,7 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
                     <div className="text-sm">{item.company}</div>
                   )}
                   {item.points && (
-                    <ul className="list-disc ml-5 mt-1">
+                    <ul className="list-disc ml-5">
                       {item.points.map((point: string, index: number) => (
                         <li key={index} className="text-sm">
                           {point}
@@ -126,7 +126,7 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
                     </ul>
                   )}
                   {item.description && (
-                    <div className="text-sm mt-1">{item.description}</div>
+                    <div className="text-sm">{item.description}</div>
                   )}
                 </>
               </div>
@@ -139,7 +139,7 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
             {resumeData.certificates.map((item) => (
               <div
                 key={item.id}
-                className="group/item relative p-2 rounded-md transition-all duration-200 border-2 border-transparent break-inside-avoid"
+                className="group/item relative px-2 pt-1 rounded-md transition-all duration-200 border-2 border-transparent break-inside-avoid"
               >
                 <>
                   <div className="flex justify-between">
@@ -154,24 +154,35 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
                     <div>{item.date}</div>
                   </div>
                   {item.description && (
-                    <div className="text-sm mt-1">{item.description}</div>
+                    <div className="text-sm">{item.description}</div>
                   )}
                 </>
               </div>
             ))}
           </div>
         );
-      case "custom":
+
+      case "customSection":
+        const customSection = resumeData.customSections.find(
+          (cs) => cs.id === section.id
+        );
         return (
-          <div className="group relative ">
-            {resumeData.customSections.map((item) => (
-              <div key={item.id} className="group/item relative p-2 ">
-                <>
-                  <div className="font-bold">{item.title}</div>
-                  <div className="text-sm mt-1">{item.content}</div>
-                </>
-              </div>
-            ))}
+          <div className="group relative">
+            {customSection && (
+              <>
+                {customSection.items.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="group/item relative px-2 pt-1 rounded-md  border-2 border-transparent "
+                  >
+                    <>
+                      <div className="font-bold">{item.title}</div>
+                      <div className="text-sm">{item.content}</div>
+                    </>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         );
       default:
@@ -202,11 +213,11 @@ const ResumePreview2 = ({ contentRef, resumeData }: resumeDataProps) => {
         >
           {/* Personal Info Section */}
           <div className="group relative  break-inside-avoid">
-            <div className="p-2">
+            <div className="px-2 pt-1">
               <h1 className="text-3xl font-bold text-center text-gray-900">
                 {resumeData.personalInfo.name}
               </h1>
-              <p className="text-center text-sm mb-2">
+              <p className="text-center text-sm mb-1">
                 {resumeData.personalInfo.title}
               </p>
               <div className="flex justify-center gap-4 text-sm">

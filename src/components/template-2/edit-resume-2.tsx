@@ -203,7 +203,7 @@ export default function EditResume() {
 
   const { setResumeData } = useResumeContext();
 
-  // setResumeData(data);
+  setResumeData(data);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
