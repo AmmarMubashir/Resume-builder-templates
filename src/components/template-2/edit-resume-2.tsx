@@ -37,6 +37,14 @@ import { useResumeContext } from "@/context/ResumeContext";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 
+const validatePersonalInfo = (personalInfo: any): boolean => {
+  if (!personalInfo.name.trim()) {
+    toast.error("Name cannot be empty");
+    return false;
+  }
+  return true;
+};
+
 const initialSections: Section[] = [
   { id: "1", title: "WORK EXPERIENCE", isVisible: true, type: "experience" },
   { id: "2", title: "EDUCATION", isVisible: true, type: "education" },
@@ -44,6 +52,8 @@ const initialSections: Section[] = [
   { id: "4", title: "SKILLS", isVisible: true, type: "skills" },
   { id: "5", title: "Achievement", isVisible: true, type: "certificates" },
 ];
+
+const MAX_CONTENT_LENGTH = 500; // Maximum character length for content fields
 
 const initialData: ResumeData = {
   personalInfo: {
@@ -377,6 +387,11 @@ export default function EditResume() {
       return;
     }
 
+    if (newSectionTitle.length > 50) {
+      toast.error("Section title is too long (maximum 50 characters)");
+      return;
+    }
+
     const newId = Math.random().toString(36).substr(2, 9);
     const newSection: Section = {
       id: newId,
@@ -426,6 +441,13 @@ export default function EditResume() {
       return false;
     }
 
+    if (content.length > MAX_CONTENT_LENGTH) {
+      toast.error(
+        `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`
+      );
+      return false;
+    }
+
     const newItemId = Math.random().toString(36).substr(2, 9);
 
     setData((prev) => ({
@@ -452,6 +474,39 @@ export default function EditResume() {
   };
 
   const handleCloseEdit = () => {
+    // Validate fields based on the current editing section
+    if (editingSection === "education" && editingId) {
+      const edu = data.education.find((item) => item.id === editingId);
+      if (edu && !edu.institution.trim()) {
+        toast.error("Institution name cannot be empty");
+        return;
+      }
+    } else if (editingSection === "experience" && editingId) {
+      const exp = data.experience.find((item) => item.id === editingId);
+      if (exp) {
+        if (!exp.title.trim()) {
+          toast.error("Title cannot be empty");
+          return;
+        }
+        if (!exp.company.trim()) {
+          toast.error("Company name cannot be empty");
+          return;
+        }
+      }
+    } else if (editingSection === "projects" && editingId) {
+      const proj = data.projects.find((item) => item.id === editingId);
+      if (proj && !proj.title.trim()) {
+        toast.error("Project title cannot be empty");
+        return;
+      }
+    } else if (editingSection === "certificates" && editingId) {
+      const cert = data.certificates.find((item) => item.id === editingId);
+      if (cert && !cert.name.trim()) {
+        toast.error("Certificate name cannot be empty");
+        return;
+      }
+    }
+
     setEditingSection(null);
     setEditingId(null);
   };
@@ -474,10 +529,21 @@ export default function EditResume() {
                   ),
                 }));
               }}
-              onBlur={() => setEditingTitle(null)}
               className="w-full p-2 border rounded hover-border transition-colors duration-200 text-center font-bold text-lg"
               autoFocus
             />
+            <button
+              onClick={() => {
+                if (!section.title.trim()) {
+                  toast.error("Section title cannot be empty");
+                  return;
+                }
+                setEditingTitle(null);
+              }}
+              className="p-2 mr-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Check className="w-4 h-4 text-green-600" />
+            </button>
           </div>
         ) : (
           <h2 className="text-lg font-bold text-[#26B6A5] uppercase border-b-2 border-[#26B6A5] pb-1 inline-block">
@@ -692,12 +758,6 @@ export default function EditResume() {
                         onClick={() => handleCloseEdit()}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
                         <Check className="w-4 h-4 text-green-600" />
                       </button>
                     </div>
@@ -776,12 +836,6 @@ export default function EditResume() {
                     onClick={() => handleCloseEdit()}
                     className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <X className="w-4 h-4 text-red-600" />
-                  </button>
-                  <button
-                    onClick={() => handleCloseEdit()}
-                    className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                  >
                     <Check className="w-4 h-4 text-green-600" />
                   </button>
                 </div>
@@ -837,27 +891,25 @@ export default function EditResume() {
                     data-id={item.id}
                   >
                     <div className="flex gap-4">
-                      {
-                        <input
-                          type="text"
-                          value={item.title}
-                          onChange={(e) => {
-                            const newData = (
-                              data[section.type as keyof ResumeData] as any[]
-                            ).map((dataItem: any) =>
-                              dataItem.id === item.id
-                                ? {
-                                    ...dataItem,
-                                    title: e.target.value,
-                                  }
-                                : dataItem
-                            );
-                            handleSave(section.type, newData);
-                          }}
-                          className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
-                          placeholder={"Title"}
-                        />
-                      }
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(e) => {
+                          const newData = (
+                            data[section.type as keyof ResumeData] as any[]
+                          ).map((dataItem: any) =>
+                            dataItem.id === item.id
+                              ? {
+                                  ...dataItem,
+                                  title: e.target.value,
+                                }
+                              : dataItem
+                          );
+                          handleSave(section.type, newData);
+                        }}
+                        className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                        placeholder={"Title"}
+                      />
                       {section.type === "experience" && (
                         <input
                           type="text"
@@ -919,13 +971,26 @@ export default function EditResume() {
                       <textarea
                         value={item.points.join("\n")}
                         onChange={(e) => {
+                          const points = e.target.value.split("\n");
+
+                          // Check if any point exceeds the maximum length
+                          const exceedsMaxLength = points.some(
+                            (point) => point.length > MAX_CONTENT_LENGTH
+                          );
+                          if (exceedsMaxLength) {
+                            toast.error(
+                              `One or more points exceed maximum length of ${MAX_CONTENT_LENGTH} characters`
+                            );
+                            return;
+                          }
+
                           const newData = (
                             data[section.type as keyof ResumeData] as any[]
                           ).map((dataItem: any) =>
                             dataItem.id === item.id
                               ? {
                                   ...dataItem,
-                                  points: e.target.value.split("\n"), // Keep empty lines
+                                  points: points, // Keep empty lines
                                 }
                               : dataItem
                           );
@@ -936,33 +1001,39 @@ export default function EditResume() {
                         placeholder="Enter points (one per line)"
                       />
                     )}
-                    {item.description && (
-                      <textarea
-                        value={item.description}
-                        onChange={(e) => {
-                          const newData = (
-                            data[section.type as keyof ResumeData] as any[]
-                          ).map((dataItem: any) =>
-                            dataItem.id === item.id
-                              ? { ...dataItem, description: e.target.value }
-                              : dataItem
-                          );
-                          handleSave(section.type, newData);
-                        }}
-                        className="w-full p-2 border rounded hover-border transition-colors duration-200"
-                        rows={4}
-                        placeholder="Description"
-                      />
-                    )}
                     <div className="flex justify-end mt-2 space-x-2">
                       <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray  transition-colors duration-200"
-                      >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
+                        onClick={() => {
+                          // Validate required fields
+                          if (section.type === "experience") {
+                            if (!item.title.trim()) {
+                              toast.error("Title cannot be empty");
+                              return;
+                            }
+                            if (!item.company.trim()) {
+                              toast.error("Company cannot be empty");
+                              return;
+                            }
+                          } else if (section.type === "projects") {
+                            if (!item.title.trim()) {
+                              toast.error("Project title cannot be empty");
+                              return;
+                            }
+                          }
+
+                          // Validate points
+                          if (item.points && item.points.length > 0) {
+                            const emptyPoints = item.points.every(
+                              (point: any) => !point.trim()
+                            );
+                            if (emptyPoints) {
+                              toast.error("Please add at least one point");
+                              return;
+                            }
+                          }
+
+                          handleCloseEdit();
+                        }}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
                         <Check className="w-4 h-4 text-green-600" />
@@ -1093,12 +1164,6 @@ export default function EditResume() {
                         onClick={() => handleCloseEdit()}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
                       >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                      <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
                         <Check className="w-4 h-4 text-green-600" />
                       </button>
                     </div>
@@ -1179,12 +1244,6 @@ export default function EditResume() {
                       placeholder="Content"
                     />
                     <div className="flex justify-end mt-2 space-x-2">
-                      <button
-                        onClick={() => handleCloseEdit()}
-                        className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
                       <button
                         onClick={() => handleCloseEdit()}
                         className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
@@ -1296,16 +1355,13 @@ export default function EditResume() {
                           rows={4}
                           placeholder="Content"
                         />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>
+                            {item.content.length} / {MAX_CONTENT_LENGTH}{" "}
+                            characters
+                          </span>
+                        </div>
                         <div className="flex justify-end mt-2 space-x-2">
-                          <button
-                            onClick={() => {
-                              setEditingCustomSection(null);
-                              setEditingId(null);
-                            }}
-                            className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                          >
-                            <X className="w-4 h-4 text-red-600" />
-                          </button>
                           <button
                             onClick={() => {
                               if (!item.title.trim()) {
@@ -1314,6 +1370,12 @@ export default function EditResume() {
                               }
                               if (!item.content.trim()) {
                                 toast.error("Content cannot be empty");
+                                return;
+                              }
+                              if (item.content.length > MAX_CONTENT_LENGTH) {
+                                toast.error(
+                                  `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`
+                                );
                                 return;
                               }
                               setEditingCustomSection(null);
@@ -1351,12 +1413,6 @@ export default function EditResume() {
                         placeholder="Content"
                       />
                       <div className="flex justify-end mt-2 space-x-2">
-                        <button
-                          onClick={() => setIsAddingCustomItem(false)}
-                          className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-                        >
-                          <X className="w-4 h-4 text-red-600" />
-                        </button>
                         <button
                           onClick={() => {
                             const titleEl = document.getElementById(
@@ -1419,11 +1475,19 @@ export default function EditResume() {
       <div className="group relative mb-8">
         <div className="absolute hidden group-hover:flex gap-2 -right-4 -top-2">
           <button
-            onClick={() =>
+            onClick={() => {
+              if (editingSection === "personalInfo") {
+                if (validatePersonalInfo(data.personalInfo)) {
+                  toast.success("Changes saved successfully");
+                } else {
+                  toast.error("Title cannot be empty");
+                  return;
+                }
+              }
               setEditingSection(
                 editingSection === "personalInfo" ? null : "personalInfo"
-              )
-            }
+              );
+            }}
             className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
           >
             {editingSection === "personalInfo" ? (
@@ -1432,14 +1496,6 @@ export default function EditResume() {
               <Edit2 className="w-5 h-5 text-primary" />
             )}
           </button>
-          {editingSection === "personalInfo" && (
-            <button
-              onClick={() => setEditingSection(null)}
-              className="p-2 bg-white rounded-md shadow hover:bg-gray-50 transition-colors duration-200"
-            >
-              <X className="w-5 h-5 text-red-600" />
-            </button>
-          )}
         </div>
         {editingSection === "personalInfo" ? (
           <div className="space-y-4">
