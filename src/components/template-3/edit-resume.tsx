@@ -14,6 +14,7 @@ import {
   Mail,
   Linkedin,
   MapPin,
+  ExternalLink,
 } from "lucide-react";
 import type { Link } from "../types";
 import {
@@ -34,6 +35,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useResumeContext } from "@/context/ResumeContext";
+import NextLink from "next/link";
 
 // Define types
 interface CustomSectionItem {
@@ -130,7 +132,7 @@ interface ResumeData {
 }
 
 // Validation constants
-const MAX_POINTS = 5;
+const MAX_POINTS = 10;
 const MAX_POINT_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 300;
 const MAX_SKILLS_PER_CATEGORY = 10;
@@ -1103,12 +1105,12 @@ export default function ResumeTemplate3() {
         </div>
       );
     }
-
+    console.log("LINK", link);
     return (
       <span className="inline-flex items-center gap-1">
         {link.text && link.url ? (
           <>
-            <a href={link.url} className="text-[#00BFA6] hover:underline">
+            <a href={link.url} className="text-[#00BFA6]  hover:underline">
               {link.text}
             </a>
             <button
@@ -1226,7 +1228,7 @@ export default function ResumeTemplate3() {
                           );
                           handleSave("education", newEducation);
                         }}
-                        className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                        className="max-w-full w-32 p-2  border rounded hover-border transition-colors duration-200"
                         placeholder="Start Date (MM/YYYY)"
                       />
                       <input
@@ -1240,7 +1242,7 @@ export default function ResumeTemplate3() {
                           );
                           handleSave("education", newEducation);
                         }}
-                        className="flex-1 p-2 border rounded hover-border transition-colors duration-200"
+                        className="max-w-full  w-32 p-2 border  rounded hover-border transition-colors duration-200"
                         placeholder="End Date (MM/YYYY)"
                       />
                     </div>
@@ -1261,7 +1263,8 @@ export default function ResumeTemplate3() {
                       <div className="text-gray-600">{edu.location}</div>
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      {edu.startDate} - {edu.endDate}
+                      {edu.startDate} - {edu.endDate}{" "}
+                      <span>{edu.gpa && ` (GPA: ${edu.gpa})`} </span>
                     </div>
                   </>
                 )}
@@ -1811,8 +1814,19 @@ export default function ResumeTemplate3() {
                                 {item.startDate} - {item.endDate}
                               </div>
                             </div>
-                            <div className="text-[#00BFA6] mb-1">
-                              {item.company}
+                            <div className="flex gap-1">
+                              <div className="text-[#00BFA6] mb-1">
+                                {item.company}
+                              </div>
+                              {item?.link && item?.link?.url && "|"}
+                              {item?.link && item?.link?.url && (
+                                <a
+                                  href={item?.link.url}
+                                  className="text-[#26B6A5] hover:underline"
+                                >
+                                  {item?.link.text}
+                                </a>
+                              )}
                             </div>
                             <ul className="list-disc ml-5 mt-1 text-sm text-gray-700">
                               {item.points.map(
@@ -2070,56 +2084,60 @@ export default function ResumeTemplate3() {
           </div>
           {editingSection === "personalInfo" ? (
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-1 space-y-2">
-                  <input
-                    type="text"
-                    value={data.personalInfo.name}
-                    onChange={(e) =>
-                      setData((prev) => ({
-                        ...prev,
-                        personalInfo: {
-                          ...prev.personalInfo,
-                          name: e.target.value,
-                        },
-                      }))
+              <div className="flex-1 space-y-2">
+                <input
+                  type="text"
+                  value={data.personalInfo.name}
+                  onChange={(e) =>
+                    setData((prev) => ({
+                      ...prev,
+                      personalInfo: {
+                        ...prev.personalInfo,
+                        name: e.target.value,
+                      },
+                    }))
+                  }
+                  className="w-full p-2 border rounded hover-border transition-colors duration-200 text-2xl font-bold"
+                  placeholder="Name"
+                />
+                <input
+                  type="text"
+                  value={data.personalInfo.title}
+                  onChange={(e) =>
+                    setData((prev) => ({
+                      ...prev,
+                      personalInfo: {
+                        ...prev.personalInfo,
+                        title: e.target.value,
+                      },
+                    }))
+                  }
+                  className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                  placeholder="Professional Title"
+                />
+              </div>
+              <div className="w-full">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setData((prev) => ({
+                          ...prev,
+                          personalInfo: {
+                            ...prev.personalInfo,
+                            photoUrl: reader.result as string,
+                          },
+                        }));
+                      };
+                      reader.readAsDataURL(file);
                     }
-                    className="w-full p-2 border rounded hover-border transition-colors duration-200 text-2xl font-bold"
-                    placeholder="Name"
-                  />
-                  <input
-                    type="text"
-                    value={data.personalInfo.title}
-                    onChange={(e) =>
-                      setData((prev) => ({
-                        ...prev,
-                        personalInfo: {
-                          ...prev.personalInfo,
-                          title: e.target.value,
-                        },
-                      }))
-                    }
-                    className="w-full p-2 border rounded hover-border transition-colors duration-200"
-                    placeholder="Professional Title"
-                  />
-                </div>
-                <div className="w-32">
-                  <input
-                    type="text"
-                    value={data.personalInfo.photoUrl}
-                    onChange={(e) =>
-                      setData((prev) => ({
-                        ...prev,
-                        personalInfo: {
-                          ...prev.personalInfo,
-                          photoUrl: e.target.value,
-                        },
-                      }))
-                    }
-                    className="w-full p-2 border rounded hover-border transition-colors duration-200"
-                    placeholder="Photo URL"
-                  />
-                </div>
+                  }}
+                  className="w-full p-2 border rounded hover-border transition-colors duration-200"
+                />
               </div>
               <div className="space-y-2">
                 {Object.entries(data.personalInfo.links).map(([key, link]) => (
@@ -2180,26 +2198,6 @@ export default function ResumeTemplate3() {
                     </button>
                   </div>
                 ))}
-                <button
-                  onClick={() => {
-                    const newKey = `link${
-                      Object.keys(data.personalInfo.links).length + 1
-                    }`;
-                    setData((prev) => ({
-                      ...prev,
-                      personalInfo: {
-                        ...prev.personalInfo,
-                        links: {
-                          ...prev.personalInfo.links,
-                          [newKey]: { text: "", url: "" },
-                        },
-                      },
-                    }));
-                  }}
-                  className="flex items-center gap-2 text-[#00BFA6] hover:text-[#00BFA6]/80"
-                >
-                  <Plus className="w-5 h-5" /> Add new link
-                </button>
               </div>
             </div>
           ) : (
@@ -2234,7 +2232,7 @@ export default function ResumeTemplate3() {
                 <img
                   src={data.personalInfo.photoUrl || "/placeholder.jpg"}
                   alt="Profile"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             </div>
