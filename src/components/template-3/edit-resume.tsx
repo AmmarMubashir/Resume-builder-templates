@@ -613,7 +613,7 @@ export default function ResumeTemplate3() {
 
   const { setResumeData } = useResumeContext();
 
-  //   setResumeData(data);
+  setResumeData(data);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

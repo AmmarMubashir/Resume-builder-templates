@@ -6,8 +6,9 @@ import Link from "next/link";
 
 interface editLayoutProps {
   previewLink: string;
+  showButton?: boolean;
 }
-const EditLayout = ({ previewLink }: editLayoutProps) => {
+const EditLayout = ({ previewLink, showButton = true }: editLayoutProps) => {
   return (
     <>
       <nav className="flex items-center justify-between px-2 sm:max-w-7xl sm:px-4 py-4">
@@ -23,21 +24,23 @@ const EditLayout = ({ previewLink }: editLayoutProps) => {
           <CircleUser className="text-primary w-7 h-7" />
         </div>
       </nav>
-      <div className="flex items-center justify-end px-2 gap-2   w-full max-w-[850px] mx-auto sm:px-4 py-2">
-        <Button className="bg-[#E6ECF8] hover:bg-[#E6ECF8]/90 text-primary h-[50]  flex items-center justify-center">
-          <X className="w-5 h-5  text-primary " />
-          <span className="text-primary font-normal">Cancel</span>
-        </Button>
-        <Button
-          className="bg-primary text-white h-[50]  flex items-center justify-center"
-          asChild
-        >
-          <Link href={previewLink}>
-            <Play className="w-5 h-5  text-white" />
-            <span className="text-white font-normal">Preview</span>
-          </Link>
-        </Button>
-      </div>
+      {showButton && (
+        <div className="flex items-center justify-end px-2 gap-2   w-full max-w-[850px] mx-auto sm:px-4 py-2">
+          <Button className="bg-[#E6ECF8] hover:bg-[#E6ECF8]/90 text-primary h-[50]  flex items-center justify-center">
+            <X className="w-5 h-5  text-primary " />
+            <span className="text-primary font-normal">Cancel</span>
+          </Button>
+          <Button
+            className="bg-primary text-white h-[50]  flex items-center justify-center"
+            asChild
+          >
+            <Link href={previewLink}>
+              <Play className="w-5 h-5  text-white" />
+              <span className="text-white font-normal">Preview</span>
+            </Link>
+          </Button>
+        </div>
+      )}
     </>
   );
 };

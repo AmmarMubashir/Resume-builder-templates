@@ -6,7 +6,7 @@ import React from "react";
 const ResumePage = () => {
   return (
     <div className="flex flex-col gap-1 ">
-      <EditLayout />
+      <EditLayout previewLink="preview3" />
       <ResumeTemplate3 />
     </div>
   );

@@ -5,10 +5,10 @@ import { useReactToPrint } from "react-to-print";
 
 import { Download, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ResumePreview2 from "@/components/ResumePreview2";
+import ResumePreview3 from "@/components/ResumePreview3";
 import EditLayout from "@/components/edit-layout";
 
-const Preview2 = () => {
+const Preview3 = () => {
   const { resumeData } = useResumeContext();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +19,7 @@ const Preview2 = () => {
 
   return (
     <div className="flex flex-col gap-1 bg-black/10 ">
-      <EditLayout previewLink="preview2" showButton={false} />
+      <EditLayout previewLink="preview3" showButton={false} />
       <div className="w-full mx-auto px-3 py-6 bg-black/10">
         <div className="flex items-center justify-end px-2 gap-2  w-full max-w-[850px] mx-auto sm:px-4 py-2 mb-3">
           <Button className="bg-[#E6ECF8] hover:bg-[#E6ECF8]/90 text-primary h-[50]  flex items-center justify-center">
@@ -39,11 +39,11 @@ const Preview2 = () => {
         <div className="md:w-1/2 mx-auto">
           {}
           {/* <ResumePreview contentRef={contentRef} resumeData={resumeData} /> */}
-          <ResumePreview2 contentRef={contentRef} resumeData={resumeData} />
+          <ResumePreview3 contentRef={contentRef} resumeData={resumeData} />
         </div>
       </div>
     </div>
   );
 };
 
-export default Preview2;
+export default Preview3;
